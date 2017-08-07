@@ -9,12 +9,12 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>cypher-http</artifactId>
+    <name>Cypher Client - HTTP</name>
+
     <properties>
         <okhttp.version>3.8.1</okhttp.version>
     </properties>
-
-    <artifactId>http-client</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
