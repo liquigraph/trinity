@@ -29,7 +29,7 @@ class Header {
     }
 
     public static Map<String, String> asMap(Header... headers) {
-        Map<String, String> result = new HashMap<>(headers.length);
+        Map<String, String> result = new HashMap<>(capacity(headers.length));;
         for (Header header : headers) {
             result.put(header.getName(), header.getValue());
         }
@@ -64,5 +64,9 @@ class Header {
         final Header other = (Header) obj;
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.value, other.value);
+    }
+
+    private static int capacity(int length) {
+        return (int) ((float) length / 0.75F + 1.0F);
     }
 }

@@ -135,7 +135,7 @@ public class HttpClient {
     }
 
     private List<ResultError> mapErrors(List<CypherExecutionError> errors) {
-        List<ResultError> result = new ArrayList<>();
+        List<ResultError> result = new ArrayList<>(errors.size());
         for (CypherExecutionError error : errors) {
             result.add(new ResultError(error.getCode(), error.getMessage()));
         }

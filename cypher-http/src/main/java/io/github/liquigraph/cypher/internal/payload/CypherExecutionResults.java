@@ -75,13 +75,15 @@ public class CypherExecutionResults {
     }
 
     private List<Row> populateRows(CypherExecutionResult singleResult) {
-        List<Row> result = new ArrayList<>();
+        List<CypherExecutionData> data = singleResult.getData();
+        List<Row> result = new ArrayList<>(data.size());
         List<String> columns = singleResult.getColumns();
 
-        for (CypherExecutionData row : singleResult.getData()) {
+        for (CypherExecutionData row : data) {
             List<Object> values = row.getRow();
-            List<Value> resultValues = new ArrayList<>();
-            for (int i = 0; i < columns.size(); i++) {
+            int columnCount = columns.size();
+            List<Value> resultValues = new ArrayList<>(columnCount);
+            for (int i = 0; i < columnCount; i++) {
                 resultValues.add(new Value(columns.get(i), values.get(i)));
             }
             result.add(new Row(resultValues));
