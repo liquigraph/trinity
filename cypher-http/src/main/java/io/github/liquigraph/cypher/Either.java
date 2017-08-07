@@ -17,8 +17,8 @@ public final class Either<KO, OK> {
         this.left = left;
         this.right = right;
         if ((this.left == null) == (this.right == null)) {
-            throw new IllegalStateException(String.format("Only left or right can be set, not none, not both.\n" +
-                    "Left: %s\n" +
+            throw new IllegalArgumentException(String.format("Only left or right must be set, not none, not both%n" +
+                    "Left: %s%n" +
                     "Right: %s", this.left, this.right));
         }
     }
