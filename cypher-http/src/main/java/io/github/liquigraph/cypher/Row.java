@@ -19,19 +19,19 @@ import java.util.List;
 import java.util.Objects;
 
 public class Row {
-    private final List<Value> resultValues;
+    private final List<Value> values;
 
-    public Row(List<Value> resultValues) {
-        this.resultValues = resultValues;
+    public Row(List<Value> values) {
+        this.values = values;
     }
 
-    public List<Value> getRowColumns() {
-        return resultValues;
+    public List<Value> getValues() {
+        return values;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resultValues);
+        return Objects.hash(values);
     }
 
     @Override
@@ -43,6 +43,6 @@ public class Row {
             return false;
         }
         final Row other = (Row) obj;
-        return Objects.equals(this.resultValues, other.resultValues);
+        return Objects.equals(this.values, other.values);
     }
 }
