@@ -15,36 +15,24 @@
  */
 package io.github.liquigraph.cypher;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
+import org.junit.runner.RunWith;
+
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-public class Row {
-    private final Map<String, Object> values;
+import static org.assertj.core.api.Assertions.assertThat;
 
-    public Row(Map<String, Object> values) {
-        this.values = values;
-    }
+@RunWith(JUnitQuickcheck.class)
+public class RowTest {
 
-    public Object get(String name) {
-        return values.get(name);
-    }
+    @Property
+    public void contains_values_set_at_instantiation(HashMap<String, Object> map) {
+        Row row = new Row(map);
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(values);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            assertThat(row.get(entry.getKey())).isEqualTo(entry.getValue());
         }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final Row other = (Row) obj;
-        return Objects.equals(this.values, other.values);
     }
 }

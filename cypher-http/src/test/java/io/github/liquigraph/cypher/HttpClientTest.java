@@ -23,15 +23,16 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.LogManager;
 
 import static io.github.liquigraph.cypher.Assertions.assertThat;
 import static io.github.liquigraph.cypher.Header.header;
 import static io.github.liquigraph.cypher.MockResponses.jsonOkResponse;
 import static io.github.liquigraph.cypher.MockResponses.jsonResponse;
-import static java.util.Arrays.asList;
 
 public class HttpClientTest {
 
@@ -189,11 +190,19 @@ public class HttpClientTest {
 
 
     private Row row(Value... values) {
-        return new Row(asList(values));
+        return new Row(asMap(values));
     }
 
     private Value value(String item, Object value) {
         return new Value(item, value);
+    }
+
+    private Map<String,Object> asMap(Value[] values) {
+        Map<String, Object> result = new HashMap<>();
+        for (Value value : values) {
+            result.put(value.getName(), value.getValue());
+        }
+        return result;
     }
 
 }

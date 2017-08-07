@@ -20,7 +20,9 @@ import io.github.liquigraph.cypher.Row;
 import io.github.liquigraph.cypher.Value;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class CypherExecutionResults {
@@ -79,14 +81,14 @@ public class CypherExecutionResults {
         List<Row> result = new ArrayList<>(data.size());
         List<String> columns = singleResult.getColumns();
 
-        for (CypherExecutionData row : data) {
-            List<Object> values = row.getRow();
+        for (CypherExecutionData datum : data) {
+            List<Object> row = datum.getRow();
             int columnCount = columns.size();
-            List<Value> resultValues = new ArrayList<>(columnCount);
+            Map<String, Object> values = new HashMap<>((int) ((float) row.size() / 0.75F + 1.0F));
             for (int i = 0; i < columnCount; i++) {
-                resultValues.add(new Value(columns.get(i), values.get(i)));
+                values.put(columns.get(i), row.get(i));
             }
-            result.add(new Row(resultValues));
+            result.add(new Row(values));
         }
         return result;
     }
