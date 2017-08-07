@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.liquigraph.cypher.internal.collection.Lists.concatenate;
+import static io.github.liquigraph.cypher.internal.collection.Lists.prepend;
 import static io.github.liquigraph.cypher.internal.http.Endpoints.openTransactionUri;
 import static io.github.liquigraph.cypher.internal.http.Endpoints.singleTransactionUri;
 import static io.github.liquigraph.cypher.internal.http.RequestBuilders.json;
@@ -61,7 +61,7 @@ public class HttpClient {
     }
 
     public Either<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries) {
-        RequestBody requestBody = requestBody(serializeQueries(concatenate(query, queries)));
+        RequestBody requestBody = requestBody(serializeQueries(prepend(query, queries)));
         Request request = singleTransaction.post(requestBody).build();
         return executeRequest(request);
     }

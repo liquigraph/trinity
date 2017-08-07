@@ -15,17 +15,31 @@
  */
 package io.github.liquigraph.cypher.internal.collection;
 
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
+import org.junit.runner.RunWith;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public final class Lists {
+@RunWith(JUnitQuickcheck.class)
+public class ListsTest {
 
-    public static final List<String> prepend(String head, String... tail) {
-        List<String> result = new ArrayList<>(1 + tail.length);
-        result.add(head);
-        result.addAll(asList(tail));
-        return result;
+    @Property
+    public void prepends_head_to_list(String head, ArrayList<String> strings) {
+        String[] tail = strings.toArray(new String[strings.size()]);
+
+        List<String> result = Lists.prepend(head, tail);
+
+        assertThat(result)
+                .hasSize(1 + tail.length)
+                .startsWith(head);
+
+        // open issue: assertj-core/issues/1052
+        if (tail.length > 0) {
+            assertThat(result).endsWith(tail);
+        }
     }
 }
