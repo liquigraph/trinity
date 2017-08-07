@@ -81,7 +81,7 @@ public class HttpClient {
         Request rollback = json().url(transaction.getLocation()).delete().build();
         try {
             httpClient.newCall(rollback).execute();
-            return Either.right(new ClosedTransaction());
+            return Either.right(ClosedTransaction.INSTANCE);
         } catch (IOException e) {
             return this.leftIoException(e);
         }
