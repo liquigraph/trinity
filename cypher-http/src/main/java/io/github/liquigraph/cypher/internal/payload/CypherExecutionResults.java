@@ -17,7 +17,6 @@ package io.github.liquigraph.cypher.internal.payload;
 
 import io.github.liquigraph.cypher.ResultData;
 import io.github.liquigraph.cypher.Row;
-import io.github.liquigraph.cypher.Value;
 
 import java.util.ArrayList;
 import java.util.HashMap;

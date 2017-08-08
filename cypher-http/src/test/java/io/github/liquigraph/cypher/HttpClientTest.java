@@ -17,6 +17,7 @@ package io.github.liquigraph.cypher;
 
 import io.github.liquigraph.cypher.internal.payload.TransactionDateFormatSupplier;
 import okhttp3.mockwebserver.MockWebServer;
+import org.assertj.core.data.MapEntry;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import static io.github.liquigraph.cypher.Assertions.assertThat;
 import static io.github.liquigraph.cypher.Header.header;
 import static io.github.liquigraph.cypher.MockResponses.jsonOkResponse;
 import static io.github.liquigraph.cypher.MockResponses.jsonResponse;
+import static org.assertj.core.data.MapEntry.entry;
 
 public class HttpClientTest {
 
@@ -65,9 +67,9 @@ public class HttpClientTest {
         assertThat(firstResultData.getRows())
                 .hasSize(3)
                 .containsExactly(
-                        row(value("item", 1.0), value("double", 2.0)),
-                        row(value("item", 2.0), value("double", 4.0)),
-                        row(value("item", 3.0), value("double", 6.0))
+                        row(entry("item", (Object) 1.0), entry("double", (Object) 2.0)),
+                        row(entry("item", (Object) 2.0), entry("double", (Object) 4.0)),
+                        row(entry("item", (Object) 3.0), entry("double", (Object) 6.0))
                 );
     }
 
@@ -88,16 +90,16 @@ public class HttpClientTest {
         ResultData firstResultData = iterator.next();
         assertThat(firstResultData.getColumns()).containsExactly("item");
         assertThat(firstResultData.getRows()).containsExactly(
-                row(value("item", 1.0)),
-                row(value("item", 2.0)),
-                row(value("item", 3.0))
+                row(entry("item", (Object) 1.0)),
+                row(entry("item", (Object) 2.0)),
+                row(entry("item", (Object) 3.0))
         );
         ResultData secondResults = iterator.next();
         assertThat(secondResults.getColumns()).containsExactly("item*2", "item*3");
         assertThat(secondResults.getRows()).containsExactly(
-                row(value("item*2", 2.0), value("item*3", 3.0)),
-                row(value("item*2", 4.0), value("item*3", 6.0)),
-                row(value("item*2", 6.0), value("item*3", 9.0))
+                row(entry("item*2", (Object) 2.0), entry("item*3", (Object) 3.0)),
+                row(entry("item*2", (Object) 4.0), entry("item*3", (Object) 6.0)),
+                row(entry("item*2", (Object) 6.0), entry("item*3", (Object) 9.0))
         );
     }
 
@@ -146,10 +148,10 @@ public class HttpClientTest {
         Iterator<ResultData> iterator = resultData.iterator();
         ResultData first = iterator.next();
         assertThat(first.getColumns()).containsExactly("item");
-        assertThat(first.getRows()).containsExactly(row(value("item", 1.0)));
+        assertThat(first.getRows()).containsExactly(row(entry("item", (Object) 1.0)));
         ResultData second = iterator.next();
         assertThat(second.getColumns()).containsExactly("item");
-        assertThat(second.getRows()).containsExactly(row(value("item", 3.0)), row(value("item", 2.0)));
+        assertThat(second.getRows()).containsExactly(row(entry("item", (Object) 3.0)), row(entry("item", (Object) 2.0)));
     }
 
     @Test
@@ -189,18 +191,16 @@ public class HttpClientTest {
     }
 
 
-    private Row row(Value... values) {
-        return new Row(asMap(values));
+    @SafeVarargs
+    private final Row row(MapEntry<String, Object>... entries) {
+        return new Row(asMap(entries));
     }
 
-    private Value value(String item, Object value) {
-        return new Value(item, value);
-    }
-
-    private Map<String,Object> asMap(Value[] values) {
-        Map<String, Object> result = new HashMap<>();
-        for (Value value : values) {
-            result.put(value.getName(), value.getValue());
+    @SafeVarargs
+    private final Map<String,Object> asMap(MapEntry<String, Object>... entries) {
+        Map<String, Object> result = new HashMap<>((int) (float) (entries.length / 0.75) + 1);
+        for (MapEntry entry : entries) {
+            result.put((String) entry.getKey(), entry.getValue());
         }
         return result;
     }
