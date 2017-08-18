@@ -15,6 +15,26 @@
  */
 package io.github.liquigraph.cypher;
 
-public enum ClosedTransaction {
-    INSTANCE;
+import java.util.Collections;
+import java.util.List;
+
+public class ClosedTransaction {
+
+    private final List<ResultData> resultData;
+    private final boolean rolledBack;
+
+    static final ClosedTransaction ROLLED_BACK = new ClosedTransaction(Collections.<ResultData>emptyList(), true);
+
+    ClosedTransaction(List<ResultData> resultData, boolean rolledBack) {
+        this.resultData = resultData;
+        this.rolledBack = rolledBack;
+    }
+
+    public List<ResultData> getResultData() {
+        return resultData;
+    }
+
+    public boolean isRolledBack() {
+        return rolledBack;
+    }
 }

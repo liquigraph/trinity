@@ -15,7 +15,6 @@
  */
 package io.github.liquigraph.cypher;
 
-import com.google.gson.Gson;
 import io.github.liquigraph.cypher.internal.payload.CypherExecutionError;
 import io.github.liquigraph.cypher.internal.payload.CypherExecutionResults;
 import io.github.liquigraph.cypher.internal.payload.CypherStatements;
@@ -27,18 +26,19 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import static io.github.liquigraph.cypher.internal.collection.Lists.prepend;
+import static io.github.liquigraph.cypher.internal.http.Endpoints.openTransactionUri;
+import static io.github.liquigraph.cypher.internal.http.Endpoints.singleTransactionUri;
+import static io.github.liquigraph.cypher.internal.http.RequestBuilders.json;
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static io.github.liquigraph.cypher.internal.collection.Lists.prepend;
-import static io.github.liquigraph.cypher.internal.http.Endpoints.openTransactionUri;
-import static io.github.liquigraph.cypher.internal.http.Endpoints.singleTransactionUri;
-import static io.github.liquigraph.cypher.internal.http.RequestBuilders.json;
-import static java.util.Arrays.asList;
+import com.google.gson.Gson;
 
 public class HttpClient {
 
@@ -86,17 +86,22 @@ public class HttpClient {
         }
     }
 
-    public Either<List<ResultError>, List<ResultData>> commit(OngoingTransaction transaction, String... queries) {
+    public Either<List<ResultError>, ClosedTransaction> commit(OngoingTransaction transaction, String... queries) {
         RequestBody body = requestBody(serializeQueries(asList(queries)));
         String url = transaction.getCommitLocation();
-        return executeRequest(json().url(url).post(body).build());
+        Either<List<ResultError>, List<ResultData>> result = executeRequest(json().url(url).post(body).build());
+
+        if (result.isLeft()) {
+            return Either.left(result.getLeft());
+        }
+        return Either.right(new ClosedTransaction(result.getRight(), false));
     }
 
     public Either<List<ResultError>, ClosedTransaction> rollback(OngoingTransaction transaction) {
         Request rollback = json().url(transaction.getLocation()).delete().build();
         try {
             httpClient.newCall(rollback).execute();
-            return Either.right(ClosedTransaction.INSTANCE);
+            return Either.right(ClosedTransaction.ROLLED_BACK);
         } catch (IOException e) {
             return this.leftIoException(e);
         }

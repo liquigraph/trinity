@@ -136,14 +136,16 @@ public class HttpClientTest {
         ).getRight();
         neo4jServer.enqueue(jsonOkResponse("{\"results\":[{\"columns\":[\"item\"],\"data\":[{\"row\":[1]}]},{\"columns\":[\"item\"],\"data\":[{\"row\":[3]},{\"row\":[2]}]}],\"errors\":[]}"));
 
-        Either<List<ResultError>, List<ResultData>> result = subject.commit(
+        Either<List<ResultError>, ClosedTransaction> result = subject.commit(
                 transaction,
                 "UNWIND [1,2,3] AS item RETURN item LIMIT 1",
                 "UNWIND [1,2,3] AS item RETURN item ORDER BY item DESC LIMIT 2"
         );
 
         assertThat(result).isRight();
-        List<ResultData> resultData = result.getRight();
+        ClosedTransaction closedTransaction = result.getRight();
+        assertThat(closedTransaction.isRolledBack()).isFalse();
+        List<ResultData> resultData = closedTransaction.getResultData();
         assertThat(resultData).hasSize(2);
         Iterator<ResultData> iterator = resultData.iterator();
         ResultData first = iterator.next();
@@ -169,6 +171,7 @@ public class HttpClientTest {
         Either<List<ResultError>, ClosedTransaction> closedTransaction = subject.rollback(transaction);
 
         assertThat(closedTransaction).isRight();
+        assertThat(closedTransaction.getRight().isRolledBack()).isTrue();
     }
 
     @Test
