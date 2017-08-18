@@ -193,6 +193,52 @@ public class HttpClientTest {
         assertThat(result.getLeft()).containsOnly(new ResultError("Neo.ClientError.Security.Unauthorized", "No authentication header supplied."));
     }
 
+    @Test
+    public void sends_queries_in_open_transaction() {
+        neo4jServer.enqueue(jsonOkResponse(String.format(
+              "{\n" +
+                    "    \"commit\": \"http://localhost:%d/db/data/transaction/1/commit\",\n" +
+                    "    \"results\": [],\n" +
+                    "    \"transaction\": {\n" +
+                    "        \"expires\": \"Fri, 18 Aug 2017 18:06:11 +0000\"\n" +
+                    "    },\n" +
+                    "    \"errors\": []\n" +
+                    "}", neo4jServer.getPort()),
+              Header.header("Location", String.format("http://localhost:%d/db/data/transaction/1", neo4jServer.getPort()))));
+        neo4jServer.enqueue(jsonOkResponse(String.format(
+              "{\n" +
+                    "    \"commit\": \"http://localhost:%d/db/data/transaction/1/commit\",\n" +
+                    "    \"results\": [\n" +
+                    "        {\n" +
+                    "            \"columns\": [\"result\"],\n" +
+                    "            \"data\": [{\"row\": [123]}]\n" +
+                    "        }\n" +
+                    "    ],\n" +
+                    "    \"transaction\": {\n" +
+                    "        \"expires\": \"Fri, 18 Aug 2017 18:06:37 +0000\"\n" +
+                    "    },\n" +
+                    "    \"errors\": []\n" +
+                    "}",
+              neo4jServer.getPort()
+        )));
+
+        Either<List<ResultError>, OngoingTransaction> result = subject.openTransaction();
+        OngoingTransaction ongoingTransaction = result.getRight();
+        assertThat(result).isRight();
+        assertThat(ongoingTransaction.getCommitLocation()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
+
+        result = subject.execute(ongoingTransaction, "RETURN 123 AS result");
+
+        assertThat(result).isRight();
+        ongoingTransaction = result.getRight();
+        assertThat(ongoingTransaction.getCommitLocation()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
+        List<ResultData> resultData = ongoingTransaction.getResultData();
+        assertThat(resultData).hasSize(1);
+        Iterator<ResultData> iterator = resultData.iterator();
+        ResultData first = iterator.next();
+        assertThat(first.getColumns()).containsExactly("result");
+        assertThat(first.getRows()).containsExactly(row(entry("result", (Object) 123.0)));
+    }
 
     @SafeVarargs
     private final Row row(MapEntry<String, Object>... entries) {

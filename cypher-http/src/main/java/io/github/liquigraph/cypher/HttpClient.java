@@ -74,13 +74,35 @@ public class HttpClient {
             if (response.isLeft()) {
                 return this.leftIoException(response.getLeft());
             }
+            String location = httpResponse.header("Location");
             CypherExecutionResults payload = response.getRight();
             return Either.right(new OngoingTransaction(
-                    httpResponse.header("Location"),
-                    expiryTime(payload),
-                    payload.getCommit(),
-                    payload.explode()
+                  location,
+                  expiryTime(payload),
+                  payload.getCommit(),
+                  payload.explode()
             ));
+        } catch (IOException e) {
+            return this.leftIoException(e);
+        }
+    }
+
+    public Either<List<ResultError>, OngoingTransaction> execute(OngoingTransaction transaction, String... queries) {
+        RequestBody body = requestBody(serializeQueries(asList(queries)));
+        String location = transaction.getLocation();
+        Request request = json().url(location).post(body).build();
+
+        try (Response httpResponse = httpClient.newCall(request).execute()) {
+            Either<IOException, CypherExecutionResults> response = deserializeResponse(httpResponse.body());
+            if (response.isLeft()) {
+                return this.leftIoException(response.getLeft());
+            }
+            CypherExecutionResults payload = response.getRight();
+            return Either.right(new OngoingTransaction(
+                  location,
+                  expiryTime(payload),
+                  payload.getCommit(),
+                  payload.explode()));
         } catch (IOException e) {
             return this.leftIoException(e);
         }

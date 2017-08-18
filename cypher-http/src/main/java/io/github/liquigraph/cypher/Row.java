@@ -45,4 +45,11 @@ public class Row {
         final Row other = (Row) obj;
         return Objects.equals(this.values, other.values);
     }
+
+    @Override
+    public String toString() {
+        return "Row{" +
+              "values=" + values +
+              '}';
+    }
 }
