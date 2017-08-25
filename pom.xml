@@ -63,6 +63,9 @@
                         <include>**/src/test/java/**</include>
                         <include>**/src/test/resources/**</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/src/test/resources/filtered/**</exclude>
+                    </excludes>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
