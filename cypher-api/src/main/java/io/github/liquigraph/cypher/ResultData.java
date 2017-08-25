@@ -16,6 +16,7 @@
 package io.github.liquigraph.cypher;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ResultData {
     private final List<String> columns;
@@ -32,5 +33,31 @@ public class ResultData {
 
     public List<Row> getRows() {
         return rows;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(columns, rows);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ResultData other = (ResultData) obj;
+        return Objects.equals(this.columns, other.columns)
+            && Objects.equals(this.rows, other.rows);
+    }
+
+    @Override
+    public String toString() {
+        return "ResultData{" +
+            "columns=" + columns +
+            ", rows=" + rows +
+            '}';
     }
 }
