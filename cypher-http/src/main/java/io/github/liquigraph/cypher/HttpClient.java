@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import com.google.gson.Gson;
 
-public class HttpClient {
+public class HttpClient implements CypherClient {
 
     private static final MediaType JSON = MediaType.parse("application/json;charset=UTF-8");
 
@@ -60,12 +60,14 @@ public class HttpClient {
         openTransaction = json().url(openTransactionUri(baseUrl));
     }
 
+    @Override
     public Either<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries) {
         RequestBody requestBody = requestBody(serializeQueries(prepend(query, queries)));
         Request request = singleTransaction.post(requestBody).build();
         return executeRequest(request);
     }
 
+    @Override
     public Either<List<ResultError>, OngoingTransaction> openTransaction(String... queries) {
         RequestBody requestBody = requestBody(serializeQueries(asList(queries)));
         Request request = openTransaction.post(requestBody).build();
@@ -87,6 +89,7 @@ public class HttpClient {
         }
     }
 
+    @Override
     public Either<List<ResultError>, OngoingTransaction> execute(OngoingTransaction transaction, String... queries) {
         RequestBody body = requestBody(serializeQueries(asList(queries)));
         String location = transaction.getLocation();
@@ -108,6 +111,7 @@ public class HttpClient {
         }
     }
 
+    @Override
     public Either<List<ResultError>, ClosedTransaction> commit(OngoingTransaction transaction, String... queries) {
         RequestBody body = requestBody(serializeQueries(asList(queries)));
         String url = transaction.getCommitLocation();
@@ -119,6 +123,7 @@ public class HttpClient {
         return Either.right(new ClosedTransaction(result.getRight(), false));
     }
 
+    @Override
     public Either<List<ResultError>, ClosedTransaction> rollback(OngoingTransaction transaction) {
         Request rollback = json().url(transaction.getLocation()).delete().build();
         try {

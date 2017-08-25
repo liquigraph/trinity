@@ -39,7 +39,7 @@ import static org.assertj.core.data.MapEntry.entry;
 public class HttpClientTest {
 
     private MockWebServer neo4jServer;
-    private HttpClient subject;
+    private CypherClient subject;
 
     @BeforeClass
     public static void prepareAll() {
