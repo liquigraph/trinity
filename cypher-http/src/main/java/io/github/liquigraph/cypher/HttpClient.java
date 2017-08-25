@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import com.google.gson.Gson;
 
-public class HttpClient implements CypherClient {
+public final class HttpClient implements CypherClient {
 
     private static final MediaType JSON = MediaType.parse("application/json;charset=UTF-8");
 
