@@ -17,10 +17,15 @@ package io.github.liquigraph.cypher;
 
 import java.util.List;
 
-public interface CypherClient {
+public interface CypherClient<OpenTx extends OngoingTransaction> {
+
    Either<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries);
-   Either<List<ResultError>, OngoingTransaction> openTransaction(String... queries);
-   Either<List<ResultError>, OngoingTransaction> execute(OngoingTransaction transaction, String... queries);
-   Either<List<ResultError>, ClosedTransaction> commit(OngoingTransaction transaction, String... queries);
-   Either<List<ResultError>, ClosedTransaction> rollback(OngoingTransaction transaction);
+
+   Either<List<ResultError>, OpenTx> openTransaction(String... queries);
+
+   Either<List<ResultError>, OpenTx> execute(OpenTx transaction, String... queries);
+
+   Either<List<ResultError>, ClosedTransaction> commit(OpenTx transaction, String... queries);
+
+   Either<List<ResultError>, ClosedTransaction> rollback(OpenTx transaction);
 }

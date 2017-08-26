@@ -15,11 +15,7 @@
  */
 package io.github.liquigraph.cypher;
 
-import java.util.List;
+public interface TransactionLocation {
 
-public interface OngoingTransaction {
-
-    TransactionLocation getLocation();
-
-    List<ResultData> getResultData();
+    String value();
 }

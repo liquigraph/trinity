@@ -39,7 +39,7 @@ import static org.assertj.core.data.MapEntry.entry;
 public class HttpClientTest {
 
     private MockWebServer neo4jServer;
-    private CypherClient subject;
+    private CypherClient<OngoingRemoteTransaction> subject;
 
     @BeforeClass
     public static void prepareAll() {
@@ -107,15 +107,15 @@ public class HttpClientTest {
     public void explicitly_opens_one_transaction_and_commits_it_in_another_request() {
         neo4jServer.enqueue(jsonOkResponse("{\"commit\": \"http://localhost:7474/db/data/transaction/1/commit\", \"results\": [], \"transaction\": { \"expires\": \"Sun, 30 Jul 2017 14:45:11 +0000\" }, \"errors\": []}", header("Location", "http://localhost:7474/db/data/transaction/1")));
 
-        Either<List<ResultError>, OngoingTransaction> result = subject.openTransaction();
+        Either<List<ResultError>, OngoingRemoteTransaction> result = subject.openTransaction();
 
         assertThat(result).isRight();
-        OngoingTransaction transaction = result.getRight();
+        OngoingRemoteTransaction transaction = result.getRight();
         long expiry = transaction.getExpiry();
         assertThat(expiry).isEqualTo(1501425911000L);
         assertThat(TransactionDateFormatSupplier.get().format(new Date(expiry))).isEqualTo("Sun, 30 Jul 2017 14:45:11 +0000");
-        assertThat(transaction.getLocation()).isEqualTo("http://localhost:7474/db/data/transaction/1");
-        assertThat(transaction.getCommitLocation()).isEqualTo("http://localhost:7474/db/data/transaction/1/commit");
+        assertThat(transaction.getLocation().value()).isEqualTo("http://localhost:7474/db/data/transaction/1");
+        assertThat(transaction.getCommitLocation().value()).isEqualTo("http://localhost:7474/db/data/transaction/1/commit");
 
         neo4jServer.enqueue(jsonOkResponse("{\"results\": [], \"errors\": []}"));
         subject.commit(transaction);
@@ -130,7 +130,7 @@ public class HttpClientTest {
                 " ],\n" +
                 " \"transaction\": { \"expires\": \"Sun, 30 Jul 2017 14:45:11 +0000\" },\n" +
                 " \"errors\": []}", neo4jServer.getPort()), header("Location", String.format("http://localhost:%d/db/data/transaction/1", neo4jServer.getPort()))));
-        OngoingTransaction transaction = subject.openTransaction(
+        OngoingRemoteTransaction transaction = subject.openTransaction(
                 "UNWIND [1,2,3] AS item RETURN item",
                 "UNWIND [1,2,3] AS item RETURN item*2,item*3"
         ).getRight();
@@ -165,7 +165,7 @@ public class HttpClientTest {
                 "}]," +
                 "\"transaction\": {\"expires\": \"Sun, 06 Aug 2017 12:54:03 +0000\"}," +
                 "\"errors\": []}", header("Location", String.format("http://localhost:%d/db/data/transaction/1", neo4jServer.getPort()))));
-        OngoingTransaction transaction = subject.openTransaction("UNWIND [1,2,3] AS item RETURN item LIMIT 1").getRight();
+        OngoingRemoteTransaction transaction = subject.openTransaction("UNWIND [1,2,3] AS item RETURN item LIMIT 1").getRight();
         neo4jServer.enqueue(jsonOkResponse("{\"results\": [], \"errors\": []}"));
 
         Either<List<ResultError>, ClosedTransaction> closedTransaction = subject.rollback(transaction);
@@ -222,16 +222,16 @@ public class HttpClientTest {
               neo4jServer.getPort()
         )));
 
-        Either<List<ResultError>, OngoingTransaction> result = subject.openTransaction();
-        OngoingTransaction ongoingTransaction = result.getRight();
+        Either<List<ResultError>, OngoingRemoteTransaction> result = subject.openTransaction();
+        OngoingRemoteTransaction ongoingTransaction = result.getRight();
         assertThat(result).isRight();
-        assertThat(ongoingTransaction.getCommitLocation()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
+        assertThat(ongoingTransaction.getCommitLocation().value()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
 
         result = subject.execute(ongoingTransaction, "RETURN 123 AS result");
 
         assertThat(result).isRight();
         ongoingTransaction = result.getRight();
-        assertThat(ongoingTransaction.getCommitLocation()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
+        assertThat(ongoingTransaction.getCommitLocation().value()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
         List<ResultData> resultData = ongoingTransaction.getResultData();
         assertThat(resultData).hasSize(1);
         Iterator<ResultData> iterator = resultData.iterator();
