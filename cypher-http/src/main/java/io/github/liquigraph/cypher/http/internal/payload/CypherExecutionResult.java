@@ -13,26 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher;
+package io.github.liquigraph.cypher.http.internal.payload;
 
+import java.util.List;
 import java.util.Objects;
 
-public final class TransactionUri implements TransactionLocation {
+public class CypherExecutionResult {
 
-    private final String uri;
+    private List<String> columns;
+    private List<CypherExecutionData> data;
 
-    public TransactionUri(String uri) {
-        this.uri = uri;
+    public List<String> getColumns() {
+        return columns;
     }
 
-    @Override
-    public String value() {
-        return uri;
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
+    }
+
+    public List<CypherExecutionData> getData() {
+        return data;
+    }
+
+    public void setData(List<CypherExecutionData> data) {
+        this.data = data;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(columns, data);
     }
 
     @Override
@@ -43,14 +52,8 @@ public final class TransactionUri implements TransactionLocation {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final TransactionUri other = (TransactionUri) obj;
-        return Objects.equals(this.uri, other.uri);
-    }
-
-    @Override
-    public String toString() {
-        return "TransactionUri{" +
-            "uri='" + uri + '\'' +
-            '}';
+        final CypherExecutionResult other = (CypherExecutionResult) obj;
+        return Objects.equals(this.columns, other.columns)
+                && Objects.equals(this.data, other.data);
     }
 }

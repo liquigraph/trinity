@@ -13,35 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher.internal.payload;
+package io.github.liquigraph.cypher.http.internal.payload;
 
 import java.util.List;
 import java.util.Objects;
 
-public class CypherExecutionResult {
+public class CypherExecutionData {
+    private List<Object> row;
 
-    private List<String> columns;
-    private List<CypherExecutionData> data;
-
-    public List<String> getColumns() {
-        return columns;
+    public List<Object> getRow() {
+        return row;
     }
 
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
-
-    public List<CypherExecutionData> getData() {
-        return data;
-    }
-
-    public void setData(List<CypherExecutionData> data) {
-        this.data = data;
+    public void setRow(List<Object> row) {
+        this.row = row;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(columns, data);
+        return Objects.hash(row);
     }
 
     @Override
@@ -52,8 +42,7 @@ public class CypherExecutionResult {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final CypherExecutionResult other = (CypherExecutionResult) obj;
-        return Objects.equals(this.columns, other.columns)
-                && Objects.equals(this.data, other.data);
+        final CypherExecutionData other = (CypherExecutionData) obj;
+        return Objects.equals(this.row, other.row);
     }
 }

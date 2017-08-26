@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher;
+package io.github.liquigraph.cypher.http;
 
-import io.github.liquigraph.cypher.internal.payload.TransactionDateFormatSupplier;
+import io.github.liquigraph.cypher.ClosedTransaction;
+import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.Either;
+import io.github.liquigraph.cypher.ResultData;
+import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.Row;
+import io.github.liquigraph.cypher.http.internal.payload.TransactionDateFormatSupplier;
 import okhttp3.mockwebserver.MockWebServer;
 import org.assertj.core.data.MapEntry;
 import org.junit.Before;
@@ -30,10 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 
-import static io.github.liquigraph.cypher.Assertions.assertThat;
-import static io.github.liquigraph.cypher.Header.header;
-import static io.github.liquigraph.cypher.MockResponses.jsonOkResponse;
-import static io.github.liquigraph.cypher.MockResponses.jsonResponse;
+import static io.github.liquigraph.cypher.http.Assertions.assertThat;
+import static io.github.liquigraph.cypher.http.Header.header;
+import static io.github.liquigraph.cypher.http.MockResponses.jsonOkResponse;
+import static io.github.liquigraph.cypher.http.MockResponses.jsonResponse;
 import static org.assertj.core.data.MapEntry.entry;
 
 public class HttpClientTest {

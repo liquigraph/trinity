@@ -13,30 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher.internal.payload;
+package io.github.liquigraph.cypher.http.internal.collection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CypherStatements {
+import static java.util.Arrays.asList;
 
-    private List<CypherStatement> statements = new ArrayList<>(1);
+public final class Lists {
 
-    public List<CypherStatement> getStatements() {
-        return statements;
-    }
-
-    public void setStatements(List<CypherStatement> statements) {
-        this.statements = statements;
-    }
-
-    public static CypherStatements create(List<String> queries) {
-        List<CypherStatement> statements = new ArrayList<>(queries.size());
-        for (String query : queries) {
-            statements.add(CypherStatement.create(query));
-        }
-        CypherStatements result = new CypherStatements();
-        result.setStatements(statements);
+    public static final List<String> prepend(String head, String... tail) {
+        List<String> result = new ArrayList<>(1 + tail.length);
+        result.add(head);
+        result.addAll(asList(tail));
         return result;
     }
 }

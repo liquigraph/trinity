@@ -13,34 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher.internal.payload;
+package io.github.liquigraph.cypher.http.internal.payload;
 
 import java.util.Objects;
 
-public class CypherExecutionError {
+public class CypherTransaction {
 
-    private String code;
-    private String message;
+    private String expires;
 
-    public String getCode() {
-        return code;
+    public String getExpires() {
+        return expires;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public void setExpires(String expires) {
+        this.expires = expires;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, message);
+        return Objects.hash(expires);
     }
 
     @Override
@@ -51,8 +42,7 @@ public class CypherExecutionError {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final CypherExecutionError other = (CypherExecutionError) obj;
-        return Objects.equals(this.code, other.code)
-                && Objects.equals(this.message, other.message);
+        final CypherTransaction other = (CypherTransaction) obj;
+        return Objects.equals(this.expires, other.expires);
     }
 }

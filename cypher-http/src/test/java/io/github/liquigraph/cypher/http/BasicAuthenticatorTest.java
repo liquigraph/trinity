@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher;
+package io.github.liquigraph.cypher.http;
 
 import okhttp3.Credentials;
 import okhttp3.HttpUrl;
@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.logging.LogManager;
 
-import static io.github.liquigraph.cypher.Assertions.assertThat;
+import static io.github.liquigraph.cypher.http.Assertions.assertThat;
 
 public class BasicAuthenticatorTest {
 

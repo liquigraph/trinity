@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher;
+package io.github.liquigraph.cypher.http;
 
 import com.google.gson.Gson;
-import io.github.liquigraph.cypher.internal.payload.CypherExecutionError;
-import io.github.liquigraph.cypher.internal.payload.CypherExecutionResults;
-import io.github.liquigraph.cypher.internal.payload.CypherStatements;
-import io.github.liquigraph.cypher.internal.payload.TransactionDateFormatSupplier;
+import io.github.liquigraph.cypher.ClosedTransaction;
+import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.Either;
+import io.github.liquigraph.cypher.ResultData;
+import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.http.internal.payload.CypherExecutionError;
+import io.github.liquigraph.cypher.http.internal.payload.CypherExecutionResults;
+import io.github.liquigraph.cypher.http.internal.payload.CypherStatements;
+import io.github.liquigraph.cypher.http.internal.payload.TransactionDateFormatSupplier;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -34,10 +39,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.liquigraph.cypher.internal.collection.Lists.prepend;
-import static io.github.liquigraph.cypher.internal.http.Endpoints.openTransactionUri;
-import static io.github.liquigraph.cypher.internal.http.Endpoints.singleTransactionUri;
-import static io.github.liquigraph.cypher.internal.http.RequestBuilders.json;
+import static io.github.liquigraph.cypher.http.internal.collection.Lists.prepend;
+import static io.github.liquigraph.cypher.http.internal.http.Endpoints.openTransactionUri;
+import static io.github.liquigraph.cypher.http.internal.http.Endpoints.singleTransactionUri;
+import static io.github.liquigraph.cypher.http.internal.http.RequestBuilders.json;
 import static java.util.Arrays.asList;
 
 public final class HttpClient implements CypherClient<OngoingRemoteTransaction> {

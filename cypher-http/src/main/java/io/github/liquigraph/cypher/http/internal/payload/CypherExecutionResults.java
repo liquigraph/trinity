@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher.internal.payload;
+package io.github.liquigraph.cypher.http.internal.payload;
 
 import io.github.liquigraph.cypher.ResultData;
 import io.github.liquigraph.cypher.Row;

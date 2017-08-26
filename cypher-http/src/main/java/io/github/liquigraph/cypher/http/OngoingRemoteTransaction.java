@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher;
+package io.github.liquigraph.cypher.http;
+
+import io.github.liquigraph.cypher.OngoingTransaction;
+import io.github.liquigraph.cypher.ResultData;
 
 import java.util.List;
 import java.util.Objects;

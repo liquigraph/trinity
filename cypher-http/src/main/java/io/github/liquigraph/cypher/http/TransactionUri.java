@@ -13,25 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher.internal.payload;
+package io.github.liquigraph.cypher.http;
+
+import io.github.liquigraph.cypher.TransactionLocation;
 
 import java.util.Objects;
 
-public class CypherTransaction {
+public final class TransactionUri implements TransactionLocation {
 
-    private String expires;
+    private final String uri;
 
-    public String getExpires() {
-        return expires;
+    public TransactionUri(String uri) {
+        this.uri = uri;
     }
 
-    public void setExpires(String expires) {
-        this.expires = expires;
+    @Override
+    public String value() {
+        return uri;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(expires);
+        return Objects.hash(uri);
     }
 
     @Override
@@ -42,7 +45,14 @@ public class CypherTransaction {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final CypherTransaction other = (CypherTransaction) obj;
-        return Objects.equals(this.expires, other.expires);
+        final TransactionUri other = (TransactionUri) obj;
+        return Objects.equals(this.uri, other.uri);
+    }
+
+    @Override
+    public String toString() {
+        return "TransactionUri{" +
+            "uri='" + uri + '\'' +
+            '}';
     }
 }
