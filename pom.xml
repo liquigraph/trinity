@@ -19,6 +19,7 @@
     <modules>
         <module>api</module>
         <module>http</module>
+        <module>embedded-2x</module>
     </modules>
 
     <dependencyManagement>
