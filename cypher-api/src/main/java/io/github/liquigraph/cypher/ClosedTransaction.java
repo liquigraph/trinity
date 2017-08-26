@@ -17,15 +17,16 @@ package io.github.liquigraph.cypher;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-public class ClosedTransaction {
+public final class ClosedTransaction {
 
     private final List<ResultData> resultData;
     private final boolean rolledBack;
 
-    static final ClosedTransaction ROLLED_BACK = new ClosedTransaction(Collections.<ResultData>emptyList(), true);
+    public static final ClosedTransaction ROLLED_BACK = new ClosedTransaction(Collections.<ResultData>emptyList(), true);
 
-    ClosedTransaction(List<ResultData> resultData, boolean rolledBack) {
+    public ClosedTransaction(List<ResultData> resultData, boolean rolledBack) {
         this.resultData = resultData;
         this.rolledBack = rolledBack;
     }
@@ -36,5 +37,23 @@ public class ClosedTransaction {
 
     public boolean isRolledBack() {
         return rolledBack;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(resultData, rolledBack);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ClosedTransaction other = (ClosedTransaction) obj;
+        return Objects.equals(this.resultData, other.resultData)
+            && Objects.equals(this.rolledBack, other.rolledBack);
     }
 }

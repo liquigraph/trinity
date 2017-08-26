@@ -18,7 +18,7 @@ package io.github.liquigraph.cypher;
 import java.util.List;
 import java.util.Objects;
 
-public class ResultData {
+public final class ResultData {
     private final List<String> columns;
     private final List<Row> rows;
 

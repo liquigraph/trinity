@@ -18,7 +18,7 @@ package io.github.liquigraph.cypher;
 import java.util.Map;
 import java.util.Objects;
 
-public class Row {
+public final class Row {
     private final Map<String, Object> values;
 
     public Row(Map<String, Object> values) {
