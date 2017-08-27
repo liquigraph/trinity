@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.logging.LogManager;
 
-import static io.github.liquigraph.cypher.http.Assertions.assertThat;
+import static io.github.liquigraph.cypher.Assertions.assertThat;
 
 public class BasicAuthenticatorTest {
 

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 
-import static io.github.liquigraph.cypher.http.Assertions.assertThat;
+import static io.github.liquigraph.cypher.Assertions.assertThat;
 import static io.github.liquigraph.cypher.http.Header.header;
 import static io.github.liquigraph.cypher.http.MockResponses.jsonOkResponse;
 import static io.github.liquigraph.cypher.http.MockResponses.jsonResponse;

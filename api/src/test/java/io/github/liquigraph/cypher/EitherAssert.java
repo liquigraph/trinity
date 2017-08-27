@@ -13,20 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher.http;
+package io.github.liquigraph.cypher;
 
-import io.github.liquigraph.cypher.Either;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.util.Preconditions;
 
-public class Assertions extends org.assertj.core.api.Assertions {
-
-    public static <L,R> EitherAssert<L,R> assertThat(Either<L,R> either) {
-        return new EitherAssert<>(either);
-    }
-}
-
-class EitherAssert<L,R> extends AbstractAssert<EitherAssert<L,R>, Either<L,R>> {
+public class EitherAssert<L,R> extends AbstractAssert<EitherAssert<L,R>, Either<L,R>> {
 
     public EitherAssert(Either<L, R> either) {
         super(either, EitherAssert.class);
