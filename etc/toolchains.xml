@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>1.7</version>
+      <id>java7</id>
+    </provides>
+    <configuration>
+      <jdkHome>[JDK7_HOME]</jdkHome>
+    </configuration>
+  </toolchain>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>1.8</version>
+      <id>java8</id>
+    </provides>
+    <configuration>
+      <jdkHome>[JDK8_HOME]</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
