@@ -27,13 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.isA;
 
-public class EitherTest {
+public class DefaultEitherTest {
 
     @Rule public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void returns_left_value() {
-        Either<String, Void> left = Either.left("foobar");
+        DefaultEither<String, Void> left = DefaultEither.left("foobar");
 
         assertThat(left.isLeft()).as("Left either must be left").isTrue();
         assertThat(left.isRight()).as("Left either must not be right").isFalse();
@@ -42,7 +42,7 @@ public class EitherTest {
 
     @Test
     public void returns_right_value() {
-        Either<Void, Integer> right = Either.right(42);
+        DefaultEither<Void, Integer> right = DefaultEither.right(42);
 
         assertThat(right.isLeft()).as("Right either must not be left").isFalse();
         assertThat(right.isRight()).as("Right either must be right").isTrue();
@@ -54,7 +54,7 @@ public class EitherTest {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(equalTo("Attempting to get unset right"));
 
-        Either.left(42).getRight();
+        DefaultEither.left(42).getRight();
     }
 
     @Test
@@ -62,7 +62,7 @@ public class EitherTest {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage(equalTo("Attempting to get unset left"));
 
-        Either.right(42).getLeft();
+        DefaultEither.right(42).getLeft();
     }
 
     @Test
@@ -88,8 +88,8 @@ public class EitherTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Constructor<Either<?, ?>> eitherConstructor() {
-        Constructor<Either<?, ?>> result = (Constructor<Either<?, ?>>) Either.class.getDeclaredConstructors()[0];
+    private Constructor<DefaultEither<?, ?>> eitherConstructor() {
+        Constructor<DefaultEither<?, ?>> result = (Constructor<DefaultEither<?, ?>>) DefaultEither.class.getDeclaredConstructors()[0];
         result.setAccessible(true);
         return result;
     }

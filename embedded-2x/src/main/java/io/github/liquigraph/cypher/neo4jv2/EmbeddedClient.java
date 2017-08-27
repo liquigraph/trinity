@@ -17,6 +17,7 @@ package io.github.liquigraph.cypher.neo4jv2;
 
 import io.github.liquigraph.cypher.ClosedTransaction;
 import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.DefaultEither;
 import io.github.liquigraph.cypher.Either;
 import io.github.liquigraph.cypher.ResultData;
 import io.github.liquigraph.cypher.ResultError;
@@ -54,10 +55,10 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
             }
             if (!errors.isEmpty()) {
                 transaction.failure();
-                return Either.left(errors);
+                return DefaultEither.left(errors);
             }
             transaction.success();
-            return Either.right(data);
+            return DefaultEither.right(data);
         }
     }
 
@@ -81,10 +82,10 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
             }
             if (!errors.isEmpty()) {
                 localTransaction.failure();
-                return Either.left(errors);
+                return DefaultEither.left(errors);
             }
             localTransaction.success();
-            return Either.right(new ClosedTransaction(data, false));
+            return DefaultEither.right(new ClosedTransaction(data, false));
         }
     }
 
@@ -92,7 +93,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     public Either<List<ResultError>, ClosedTransaction> rollback(OngoingLocalTransaction transaction) {
         try (Transaction localTransaction = transaction.getLocalTransaction()) {
             localTransaction.failure();
-            return Either.right(ClosedTransaction.ROLLED_BACK);
+            return DefaultEither.right(ClosedTransaction.ROLLED_BACK);
         }
     }
 
@@ -108,9 +109,9 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
         if (!errors.isEmpty()) {
             localTransaction.failure();
             localTransaction.close();
-            return Either.left(errors);
+            return DefaultEither.left(errors);
         }
-        return Either.right(new OngoingLocalTransaction(localTransaction, data));
+        return DefaultEither.right(new OngoingLocalTransaction(localTransaction, data));
     }
 
     private Either<ResultError, ResultData> execute(String query) {
@@ -121,11 +122,11 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
                 while (resultIterator.hasNext()) {
                     rows.add(new Row(asJavaMap(resultIterator.next())));
                 }
-                return Either.right(new ResultData(executionResult.columns(), rows));
+                return DefaultEither.right(new ResultData(executionResult.columns(), rows));
             }
         }
         catch (CypherException exception) {
-            return Either.left(CypherExceptionConverter.INSTANCE.convert(exception));
+            return DefaultEither.left(CypherExceptionConverter.INSTANCE.convert(exception));
         }
     }
 
