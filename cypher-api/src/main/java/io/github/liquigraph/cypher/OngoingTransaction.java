@@ -19,7 +19,5 @@ import java.util.List;
 
 public interface OngoingTransaction {
 
-    TransactionLocation getLocation();
-
     List<ResultData> getResultData();
 }

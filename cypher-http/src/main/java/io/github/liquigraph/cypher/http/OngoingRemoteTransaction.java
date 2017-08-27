@@ -34,7 +34,6 @@ public class OngoingRemoteTransaction implements OngoingTransaction {
         this.data = data;
     }
 
-    @Override
     public TransactionUri getLocation() {
         return location;
     }

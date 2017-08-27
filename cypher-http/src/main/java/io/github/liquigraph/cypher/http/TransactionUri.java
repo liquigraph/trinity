@@ -15,11 +15,9 @@
  */
 package io.github.liquigraph.cypher.http;
 
-import io.github.liquigraph.cypher.TransactionLocation;
-
 import java.util.Objects;
 
-public final class TransactionUri implements TransactionLocation {
+public final class TransactionUri {
 
     private final String uri;
 
@@ -27,7 +25,6 @@ public final class TransactionUri implements TransactionLocation {
         this.uri = uri;
     }
 
-    @Override
     public String value() {
         return uri;
     }
