@@ -13,12 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.liquigraph.cypher;
+package io.github.liquigraph.cypher.neo4jv3.internal;
 
-public class Assertions extends org.assertj.core.api.Assertions {
+import java.util.Iterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-    public static <L,R> EitherAssert<L,R> assertThat(Either<L,R> either) {
-        return new EitherAssert<>(either);
+public final class Streams {
+
+    private Streams() {
+        throw new UnsupportedOperationException("Static class");
+    }
+
+    public static <T> Stream<T> createStream(Iterator<T> iterator, int characteristics) {
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(iterator, characteristics),
+            false
+        );
     }
 }
-

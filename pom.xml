@@ -20,6 +20,7 @@
         <module>api</module>
         <module>http</module>
         <module>embedded-2x</module>
+        <module>embedded-3x</module>
     </modules>
 
     <dependencyManagement>
