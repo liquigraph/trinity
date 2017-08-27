@@ -17,15 +17,15 @@
     </properties>
 
     <modules>
-        <module>cypher-api</module>
-        <module>cypher-http</module>
+        <module>api</module>
+        <module>http</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>cypher-api</artifactId>
+                <artifactId>cypher-client-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

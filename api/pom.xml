@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cypher-api</artifactId>
+    <artifactId>cypher-client-api</artifactId>
     <name>Cypher Client - API</name>
 
     <dependencies>

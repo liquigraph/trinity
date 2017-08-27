@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cypher-http</artifactId>
+    <artifactId>cypher-http-client</artifactId>
     <name>Cypher Client - HTTP</name>
 
     <properties>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>cypher-api</artifactId>
+            <artifactId>cypher-client-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
