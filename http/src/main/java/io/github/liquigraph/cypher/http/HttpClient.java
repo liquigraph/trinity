@@ -50,17 +50,17 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     private static final MediaType JSON = MediaType.parse("application/json;charset=UTF-8");
 
-    private final OkHttpClient httpClient;
-    private final Gson gson;
-    private final Request.Builder singleTransaction;
-    private final Request.Builder openTransaction;
+    private OkHttpClient httpClient;
+    private Gson gson;
+    private Request.Builder singleTransaction;
+    private Request.Builder openTransaction;
 
     public HttpClient(String baseUrl) {
-        this(baseUrl, null, null);
+        this(baseUrl, new OkHttpClient());
     }
 
-    public HttpClient(String baseUrl, String username, String password) {
-        httpClient = createHttpClient(username, password);
+    public HttpClient(String baseUrl, OkHttpClient client) {
+        httpClient = client;
         gson = new Gson();
         singleTransaction = json().url(singleTransactionUri(baseUrl));
         openTransaction = json().url(openTransactionUri(baseUrl));
@@ -138,14 +138,6 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         } catch (IOException e) {
             return this.leftIoException(e);
         }
-    }
-
-    private static OkHttpClient createHttpClient(String username, String password) {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        if (username != null && password != null) {
-            builder = builder.authenticator(new BasicAuthenticator(username, password));
-        }
-        return builder.build();
     }
 
     private static RequestBody requestBody(String serialize) {

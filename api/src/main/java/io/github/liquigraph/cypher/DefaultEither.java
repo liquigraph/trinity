@@ -63,4 +63,12 @@ public final class DefaultEither<KO, OK> implements Either<KO, OK> {
     public boolean isRight() {
         return right != null;
     }
+
+    @Override
+    public String toString() {
+        return "Either{" +
+            "left=" + left +
+            ", right=" + right +
+            '}';
+    }
 }

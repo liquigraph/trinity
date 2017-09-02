@@ -85,4 +85,12 @@ public final class FunctionalEither<KO, OK> implements Either<KO, OK> {
     public boolean isRight() {
         return right.isPresent();
     }
+
+    @Override
+    public String toString() {
+        return "Either{" +
+            "left=" + left +
+            ", right=" + right +
+            '}';
+    }
 }

@@ -66,6 +66,7 @@ public class EmbeddedClientTest {
         graphDatabase = graphDatabase(
             this.folder.newFolder("cypher-embedded-2x"),
             CURRENT_VERSION);
+
         subject = new EmbeddedClient(graphDatabase);
     }
 

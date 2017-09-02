@@ -41,7 +41,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
 
     public EmbeddedClient(GraphDatabaseService graphDatabase) {
         this.graphDatabase = graphDatabase;
-        cypherExecutor = new ExecutionEngine(graphDatabase);
+        this.cypherExecutor = new ExecutionEngine(graphDatabase);
     }
 
     @Override

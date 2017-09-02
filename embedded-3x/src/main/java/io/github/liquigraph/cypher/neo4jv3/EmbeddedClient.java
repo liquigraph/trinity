@@ -39,7 +39,7 @@ import static java.util.Arrays.stream;
 
 public final class EmbeddedClient implements CypherClient<OngoingLocalTransaction> {
 
-    private final GraphDatabaseService graphDatabase;
+    private GraphDatabaseService graphDatabase;
 
     public EmbeddedClient(GraphDatabaseService graphDatabase) {
         this.graphDatabase = graphDatabase;
