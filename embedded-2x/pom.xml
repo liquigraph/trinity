@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>embedded-2x</artifactId>
+    <artifactId>cypher-embedded-client-2x</artifactId>
     <name>Cypher Client - Embedded Neo4j (2.x)</name>
 
     <properties>
