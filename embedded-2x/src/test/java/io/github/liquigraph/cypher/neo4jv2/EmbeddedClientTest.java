@@ -16,10 +16,10 @@
 package io.github.liquigraph.cypher.neo4jv2;
 
 import io.github.liquigraph.cypher.ClosedTransaction;
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.Either;
+import io.github.liquigraph.cypher.Fault;
 import io.github.liquigraph.cypher.Neo4jVersionDetector;
-import io.github.liquigraph.cypher.ResultData;
-import io.github.liquigraph.cypher.ResultError;
 import io.github.liquigraph.cypher.Row;
 import io.github.liquigraph.cypher.SemanticVersion;
 import org.assertj.core.api.Assertions;
@@ -72,81 +72,67 @@ public class EmbeddedClientTest {
 
     @Test
     public void runs_statements_in_single_transaction() {
-        Either<List<ResultError>, List<ResultData>> result = subject.runSingleTransaction(
+        Either<List<Fault>, List<Data>> result = subject.runSingleTransaction(
             "MATCH (n) RETURN COUNT(n)",
             "RETURN 42 AS `Réponse à La Grande Question sur la vie, l'univers et le reste`");
 
         assertThat(result).isRight();
-        List<ResultData> data = result.getRight();
+        List<Data> data = result.getRight();
         assertThat(data)
             .containsExactly(
-                new ResultData(
-                    singletonList("COUNT(n)"),
-                    singletonList(
-                        singleColumnRow("COUNT(n)", 0L))),
-                new ResultData(
-                    singletonList("Réponse à La Grande Question sur la vie, l'univers et le reste"),
-                    singletonList(
-                        singleColumnRow("Réponse à La Grande Question sur la vie, l'univers et le reste", 42L))));
+                new Data("COUNT(n)", new Row("COUNT(n)", 0L)),
+                new Data("Réponse à La Grande Question sur la vie, l'univers et le reste",
+                    new Row("Réponse à La Grande Question sur la vie, l'univers et le reste", 42L)));
     }
 
     @Test
     public void returns_errors_from_invalid_statements() {
-        Either<List<ResultError>, List<ResultData>> result = subject.runSingleTransaction(
+        Either<List<Fault>, List<Data>> result = subject.runSingleTransaction(
             "MATCH (n) RETURN COUNT(n)",
             "JEU, SET et MATCH -- oops not a valid query");
 
         assertThat(result).isLeft();
-        List<ResultError> data = result.getLeft();
+        List<Fault> data = result.getLeft();
         assertThat(data)
             .containsExactly(
-                new ResultError(errorCode(), errorDescription()));
+                new Fault(errorCode(), errorDescription()));
     }
 
     @Test
     public void opens_transaction() {
-        Either<List<ResultError>, OngoingLocalTransaction> result = subject.openTransaction(
+        Either<List<Fault>, OngoingLocalTransaction> result = subject.openTransaction(
             "RETURN [1,2,3] AS x"
         );
 
         assertThat(result).isRight();
         OngoingLocalTransaction localTransaction = result.getRight();
-        assertThat(localTransaction.getResultData())
-            .containsExactly(new ResultData(
-                singletonList("x"),
-                singletonList(singleColumnRow("x", asList(1L, 2L, 3L))
-            )));
+        assertThat(localTransaction.getData())
+            .containsExactly(new Data("x", new Row("x", asList(1L, 2L, 3L))));
     }
 
     @Test
     public void executes_in_open_transaction() {
-        Either<List<ResultError>, OngoingLocalTransaction> openTransaction = subject.openTransaction();
-        Either<List<ResultError>, OngoingLocalTransaction> result = subject.execute(openTransaction.getRight(), "RETURN [4,5,6] AS x");
+        Either<List<Fault>, OngoingLocalTransaction> openTransaction = subject.openTransaction();
+        Either<List<Fault>, OngoingLocalTransaction> result = subject.execute(openTransaction.getRight(), "RETURN [4,5,6] AS x");
 
         assertThat(result).isRight();
         OngoingLocalTransaction localTransaction = result.getRight();
-        assertThat(localTransaction.getResultData())
-            .containsExactly(new ResultData(
-                singletonList("x"),
-                singletonList(singleColumnRow("x", asList(4L, 5L, 6L))
-            )));
+        assertThat(localTransaction.getData())
+            .containsExactly(new Data("x", new Row("x", asList(4L, 5L, 6L))));
     }
 
     @Test
     public void commits_an_open_transaction() {
-        Either<List<ResultError>, OngoingLocalTransaction> openTransaction = subject.openTransaction();
-        Either<List<ResultError>, ClosedTransaction> result = subject.commit(
+        Either<List<Fault>, OngoingLocalTransaction> openTransaction = subject.openTransaction();
+        Either<List<Fault>, ClosedTransaction> result = subject.commit(
             openTransaction.getRight(),
             "CREATE (n:Foo {type:'Fighter'}) RETURN n.type");
 
         assertThat(result).isRight();
         ClosedTransaction completedTransaction = result.getRight();
         assertThat(completedTransaction.isRolledBack()).overridingErrorMessage("Transaction must not be rolled back").isFalse();
-        assertThat(completedTransaction.getResultData())
-            .containsExactly(new ResultData(
-                singletonList("n.type"),
-                singletonList(singleColumnRow("n.type", "Fighter")
-            )));
+        assertThat(completedTransaction.getData())
+            .containsExactly(new Data("n.type", new Row("n.type", "Fighter")));
 
         try (Transaction ignored = graphDatabase.beginTx()) {
             assertThat(GlobalGraphOperations.at(graphDatabase).getAllNodes())
@@ -157,13 +143,13 @@ public class EmbeddedClientTest {
 
     @Test
     public void rolls_back_an_open_transaction() {
-        Either<List<ResultError>, OngoingLocalTransaction> openTransaction = subject.openTransaction("CREATE (n:Bar {type:'Ry White'}) RETURN n.type");
-        Either<List<ResultError>, ClosedTransaction> result = subject.rollback(openTransaction.getRight());
+        Either<List<Fault>, OngoingLocalTransaction> openTransaction = subject.openTransaction("CREATE (n:Bar {type:'Ry White'}) RETURN n.type");
+        Either<List<Fault>, ClosedTransaction> result = subject.rollback(openTransaction.getRight());
 
         assertThat(result).isRight();
         ClosedTransaction completedTransaction = result.getRight();
         assertThat(completedTransaction.isRolledBack()).overridingErrorMessage("Transaction must be rolled back").isTrue();
-        assertThat(completedTransaction.getResultData()).isEmpty();
+        assertThat(completedTransaction.getData()).isEmpty();
 
         try (Transaction ignored = graphDatabase.beginTx()) {
             assertThat(GlobalGraphOperations.at(graphDatabase).getAllNodes())
@@ -202,12 +188,6 @@ public class EmbeddedClientTest {
             "Invalid input 'J': expected <init> (line 1, column 1 (offset: 0))\n" +
             "\"JEU, SET et MATCH -- oops not a valid query\"\n" +
             " ^";
-    }
-
-    private Row singleColumnRow(String column, Object value) {
-        Map<String, Object> map = new HashMap<>((int) Math.ceil(1 / 0.75));
-        map.put(column, value);
-        return new Row(map);
     }
 
     private GraphDatabaseService graphDatabase(File folder, SemanticVersion neo4jVersion) {

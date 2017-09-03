@@ -15,29 +15,29 @@
  */
 package io.github.liquigraph.cypher;
 
-import java.util.List;
 import java.util.Objects;
 
-public final class ResultData {
-    private final List<String> columns;
-    private final List<Row> rows;
+public class Fault {
 
-    public ResultData(List<String> columns, List<Row> rows) {
-        this.columns = columns;
-        this.rows = rows;
+    private final String code;
+    private final String message;
+
+    public Fault(String code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
-    public List<String> getColumns() {
-        return columns;
+    public String getCode() {
+        return code;
     }
 
-    public List<Row> getRows() {
-        return rows;
+    public String getMessage() {
+        return message;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(columns, rows);
+        return Objects.hash(code, message);
     }
 
     @Override
@@ -48,16 +48,16 @@ public final class ResultData {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final ResultData other = (ResultData) obj;
-        return Objects.equals(this.columns, other.columns)
-            && Objects.equals(this.rows, other.rows);
+        final Fault other = (Fault) obj;
+        return Objects.equals(this.code, other.code)
+                && Objects.equals(this.message, other.message);
     }
 
     @Override
     public String toString() {
-        return "ResultData{" +
-            "columns=" + columns +
-            ", rows=" + rows +
-            '}';
+        return "Fault{" +
+                "code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

@@ -15,8 +15,8 @@
  */
 package io.github.liquigraph.cypher.neo4jv2;
 
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.OngoingTransaction;
-import io.github.liquigraph.cypher.ResultData;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
@@ -25,15 +25,15 @@ import java.util.Objects;
 public final class OngoingLocalTransaction implements OngoingTransaction {
 
     private final Transaction localTransaction;
-    private final List<ResultData> data;
+    private final List<Data> data;
 
-    public OngoingLocalTransaction(Transaction localTransaction, List<ResultData> data) {
+    public OngoingLocalTransaction(Transaction localTransaction, List<Data> data) {
         this.localTransaction = localTransaction;
         this.data = data;
     }
 
     @Override
-    public List<ResultData> getResultData() {
+    public List<Data> getData() {
         return data;
     }
 

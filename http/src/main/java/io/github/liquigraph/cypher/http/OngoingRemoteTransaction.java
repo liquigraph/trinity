@@ -15,8 +15,8 @@
  */
 package io.github.liquigraph.cypher.http;
 
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.OngoingTransaction;
-import io.github.liquigraph.cypher.ResultData;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,9 +25,9 @@ public class OngoingRemoteTransaction implements OngoingTransaction {
     private final TransactionUri location;
     private final long expiry;
     private final TransactionUri commitLocation;
-    private final List<ResultData> data;
+    private final List<Data> data;
 
-    public OngoingRemoteTransaction(TransactionUri location, long expiry, TransactionUri commitLocation, List<ResultData> data) {
+    public OngoingRemoteTransaction(TransactionUri location, long expiry, TransactionUri commitLocation, List<Data> data) {
         this.location = location;
         this.expiry = expiry;
         this.commitLocation = commitLocation;
@@ -47,7 +47,7 @@ public class OngoingRemoteTransaction implements OngoingTransaction {
     }
 
     @Override
-    public List<ResultData> getResultData() {
+    public List<Data> getData() {
         return data;
     }
 

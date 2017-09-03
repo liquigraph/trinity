@@ -17,9 +17,9 @@ package io.github.liquigraph.cypher.http;
 
 import io.github.liquigraph.cypher.ClosedTransaction;
 import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.Either;
-import io.github.liquigraph.cypher.ResultData;
-import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.Fault;
 import io.github.liquigraph.cypher.Row;
 import io.github.liquigraph.cypher.http.internal.payload.TransactionDateFormatSupplier;
 import okhttp3.OkHttpClient;
@@ -64,12 +64,12 @@ public class HttpClientTest {
     public void returns_several_rows_with_several_columns() throws IOException {
         neo4jServer.enqueue(jsonOkResponse("{\"results\": [{\"columns\": [\"item\", \"double\" ], \"data\": [{\"row\": [1, 2 ], \"meta\": [null, null ]}, {\"row\": [2, 4 ], \"meta\": [null, null ]}, {\"row\": [3, 6 ], \"meta\": [null, null ]}]}], \"errors\": []}"));
 
-        Either<List<ResultError>, List<ResultData>> result = subject.runSingleTransaction("UNWIND [1,2,3] AS item RETURN item, 2*item AS double");
+        Either<List<Fault>, List<Data>> result = subject.runSingleTransaction("UNWIND [1,2,3] AS item RETURN item, 2*item AS double");
 
         assertThat(result).isRight();
-        List<ResultData> resultData = result.getRight();
-        assertThat(resultData).hasSize(1);
-        ResultData firstResultData = resultData.iterator().next();
+        List<Data> data = result.getRight();
+        assertThat(data).hasSize(1);
+        Data firstResultData = data.iterator().next();
         assertThat(firstResultData.getColumns()).containsExactly("item", "double");
         assertThat(firstResultData.getRows())
                 .hasSize(3)
@@ -86,22 +86,22 @@ public class HttpClientTest {
                 "{\"columns\": [\"item\"], \"data\": [{\"row\": [1]}, {\"row\": [2]}, {\"row\": [3]}]}, " +
                 "{\"columns\": [\"item*2\", \"item*3\"], \"data\": [{\"row\": [2, 3]}, {\"row\": [4, 6]}, {\"row\": [6, 9]}]}], \"errors\": []}"));
 
-        Either<List<ResultError>, List<ResultData>> result = subject.runSingleTransaction(
+        Either<List<Fault>, List<Data>> result = subject.runSingleTransaction(
                 "UNWIND [1,2,3] AS item RETURN item",
                 "UNWIND [1,2,3] AS item RETURN item*2,item*3");
 
         assertThat(result).isRight();
-        List<ResultData> resultData = result.getRight();
-        assertThat(resultData).hasSize(2);
-        Iterator<ResultData> iterator = resultData.iterator();
-        ResultData firstResultData = iterator.next();
+        List<Data> data = result.getRight();
+        assertThat(data).hasSize(2);
+        Iterator<Data> iterator = data.iterator();
+        Data firstResultData = iterator.next();
         assertThat(firstResultData.getColumns()).containsExactly("item");
         assertThat(firstResultData.getRows()).containsExactly(
-                row(entry("item", (Object) 1.0)),
-                row(entry("item", (Object) 2.0)),
-                row(entry("item", (Object) 3.0))
+                new Row("item", 1.0),
+                new Row("item", 2.0),
+                new Row("item", 3.0)
         );
-        ResultData secondResults = iterator.next();
+        Data secondResults = iterator.next();
         assertThat(secondResults.getColumns()).containsExactly("item*2", "item*3");
         assertThat(secondResults.getRows()).containsExactly(
                 row(entry("item*2", (Object) 2.0), entry("item*3", (Object) 3.0)),
@@ -114,7 +114,7 @@ public class HttpClientTest {
     public void explicitly_opens_one_transaction_and_commits_it_in_another_request() {
         neo4jServer.enqueue(jsonOkResponse("{\"commit\": \"http://localhost:7474/db/data/transaction/1/commit\", \"results\": [], \"transaction\": { \"expires\": \"Sun, 30 Jul 2017 14:45:11 +0000\" }, \"errors\": []}", header("Location", "http://localhost:7474/db/data/transaction/1")));
 
-        Either<List<ResultError>, OngoingRemoteTransaction> result = subject.openTransaction();
+        Either<List<Fault>, OngoingRemoteTransaction> result = subject.openTransaction();
 
         assertThat(result).isRight();
         OngoingRemoteTransaction transaction = result.getRight();
@@ -143,7 +143,7 @@ public class HttpClientTest {
         ).getRight();
         neo4jServer.enqueue(jsonOkResponse("{\"results\":[{\"columns\":[\"item\"],\"data\":[{\"row\":[1]}]},{\"columns\":[\"item\"],\"data\":[{\"row\":[3]},{\"row\":[2]}]}],\"errors\":[]}"));
 
-        Either<List<ResultError>, ClosedTransaction> result = subject.commit(
+        Either<List<Fault>, ClosedTransaction> result = subject.commit(
                 transaction,
                 "UNWIND [1,2,3] AS item RETURN item LIMIT 1",
                 "UNWIND [1,2,3] AS item RETURN item ORDER BY item DESC LIMIT 2"
@@ -152,13 +152,13 @@ public class HttpClientTest {
         assertThat(result).isRight();
         ClosedTransaction closedTransaction = result.getRight();
         assertThat(closedTransaction.isRolledBack()).isFalse();
-        List<ResultData> resultData = closedTransaction.getResultData();
-        assertThat(resultData).hasSize(2);
-        Iterator<ResultData> iterator = resultData.iterator();
-        ResultData first = iterator.next();
+        List<Data> data = closedTransaction.getData();
+        assertThat(data).hasSize(2);
+        Iterator<Data> iterator = data.iterator();
+        Data first = iterator.next();
         assertThat(first.getColumns()).containsExactly("item");
         assertThat(first.getRows()).containsExactly(row(entry("item", (Object) 1.0)));
-        ResultData second = iterator.next();
+        Data second = iterator.next();
         assertThat(second.getColumns()).containsExactly("item");
         assertThat(second.getRows()).containsExactly(row(entry("item", (Object) 3.0)), row(entry("item", (Object) 2.0)));
     }
@@ -175,7 +175,7 @@ public class HttpClientTest {
         OngoingRemoteTransaction transaction = subject.openTransaction("UNWIND [1,2,3] AS item RETURN item LIMIT 1").getRight();
         neo4jServer.enqueue(jsonOkResponse("{\"results\": [], \"errors\": []}"));
 
-        Either<List<ResultError>, ClosedTransaction> closedTransaction = subject.rollback(transaction);
+        Either<List<Fault>, ClosedTransaction> closedTransaction = subject.rollback(transaction);
 
         assertThat(closedTransaction).isRight();
         assertThat(closedTransaction.getRight().isRolledBack()).isTrue();
@@ -194,10 +194,10 @@ public class HttpClientTest {
                         "}")
                         .setResponseCode(401));
 
-        Either<List<ResultError>, List<ResultData>> result = subject.runSingleTransaction("RETURN 42");
+        Either<List<Fault>, List<Data>> result = subject.runSingleTransaction("RETURN 42");
 
         assertThat(result).isLeft();
-        assertThat(result.getLeft()).containsOnly(new ResultError("Neo.ClientError.Security.Unauthorized", "No authentication header supplied."));
+        assertThat(result.getLeft()).containsOnly(new Fault("Neo.ClientError.Security.Unauthorized", "No authentication header supplied."));
     }
 
     @Test
@@ -229,7 +229,7 @@ public class HttpClientTest {
               neo4jServer.getPort()
         )));
 
-        Either<List<ResultError>, OngoingRemoteTransaction> result = subject.openTransaction();
+        Either<List<Fault>, OngoingRemoteTransaction> result = subject.openTransaction();
         OngoingRemoteTransaction ongoingTransaction = result.getRight();
         assertThat(result).isRight();
         assertThat(ongoingTransaction.getCommitLocation().value()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
@@ -239,10 +239,10 @@ public class HttpClientTest {
         assertThat(result).isRight();
         ongoingTransaction = result.getRight();
         assertThat(ongoingTransaction.getCommitLocation().value()).isEqualTo(String.format("http://localhost:%d/db/data/transaction/1/commit", neo4jServer.getPort()));
-        List<ResultData> resultData = ongoingTransaction.getResultData();
-        assertThat(resultData).hasSize(1);
-        Iterator<ResultData> iterator = resultData.iterator();
-        ResultData first = iterator.next();
+        List<Data> data = ongoingTransaction.getData();
+        assertThat(data).hasSize(1);
+        Iterator<Data> iterator = data.iterator();
+        Data first = iterator.next();
         assertThat(first.getColumns()).containsExactly("result");
         assertThat(first.getRows()).containsExactly(row(entry("result", (Object) 123.0)));
     }

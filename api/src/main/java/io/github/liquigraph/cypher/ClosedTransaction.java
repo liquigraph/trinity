@@ -21,18 +21,18 @@ import java.util.Objects;
 
 public final class ClosedTransaction {
 
-    private final List<ResultData> resultData;
+    private final List<Data> data;
     private final boolean rolledBack;
 
-    public static final ClosedTransaction ROLLED_BACK = new ClosedTransaction(Collections.<ResultData>emptyList(), true);
+    public static final ClosedTransaction ROLLED_BACK = new ClosedTransaction(Collections.<Data>emptyList(), true);
 
-    public ClosedTransaction(List<ResultData> resultData, boolean rolledBack) {
-        this.resultData = resultData;
+    public ClosedTransaction(List<Data> data, boolean rolledBack) {
+        this.data = data;
         this.rolledBack = rolledBack;
     }
 
-    public List<ResultData> getResultData() {
-        return resultData;
+    public List<Data> getData() {
+        return data;
     }
 
     public boolean isRolledBack() {
@@ -41,7 +41,7 @@ public final class ClosedTransaction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(resultData, rolledBack);
+        return Objects.hash(data, rolledBack);
     }
 
     @Override
@@ -53,7 +53,7 @@ public final class ClosedTransaction {
             return false;
         }
         final ClosedTransaction other = (ClosedTransaction) obj;
-        return Objects.equals(this.resultData, other.resultData)
+        return Objects.equals(this.data, other.data)
             && Objects.equals(this.rolledBack, other.rolledBack);
     }
 }

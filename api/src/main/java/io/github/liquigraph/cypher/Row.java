@@ -15,11 +15,17 @@
  */
 package io.github.liquigraph.cypher;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public final class Row {
+
     private final Map<String, Object> values;
+
+    public Row(String singleKey, Object singleValue) {
+        this(map(singleKey, singleValue));
+    }
 
     public Row(Map<String, Object> values) {
         this.values = values;
@@ -51,5 +57,11 @@ public final class Row {
         return "Row{" +
               "values=" + values +
               '}';
+    }
+
+    private static Map<String, Object> map(String singleKey, Object singleValue) {
+        HashMap<String, Object> map = new HashMap<>(2);
+        map.put(singleKey, singleValue);
+        return map;
     }
 }

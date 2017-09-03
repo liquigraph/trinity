@@ -19,5 +19,5 @@ import java.util.List;
 
 public interface OngoingTransaction {
 
-    List<ResultData> getResultData();
+    List<Data> getData();
 }

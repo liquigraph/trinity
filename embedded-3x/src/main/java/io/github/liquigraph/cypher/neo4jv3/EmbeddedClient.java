@@ -17,8 +17,8 @@ package io.github.liquigraph.cypher.neo4jv3;
 
 import io.github.liquigraph.cypher.ClosedTransaction;
 import io.github.liquigraph.cypher.CypherClient;
-import io.github.liquigraph.cypher.ResultData;
-import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.Data;
+import io.github.liquigraph.cypher.Fault;
 import io.github.liquigraph.cypher.Row;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -46,7 +46,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     @Override
-    public FunctionalEither<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries) {
+    public FunctionalEither<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries) {
         try (Transaction transaction = graphDatabase.beginTx()) {
             return map(
                 executeAll(query, queries),
@@ -59,17 +59,17 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     @Override
-    public FunctionalEither<List<ResultError>, OngoingLocalTransaction> openTransaction(String... queries) {
+    public FunctionalEither<List<Fault>, OngoingLocalTransaction> openTransaction(String... queries) {
         return executeInTransaction(graphDatabase.beginTx(), queries);
     }
 
     @Override
-    public FunctionalEither<List<ResultError>, OngoingLocalTransaction> execute(OngoingLocalTransaction ongoingTransaction, String... queries) {
+    public FunctionalEither<List<Fault>, OngoingLocalTransaction> execute(OngoingLocalTransaction ongoingTransaction, String... queries) {
         return executeInTransaction(ongoingTransaction.getTransaction(), queries);
     }
 
     @Override
-    public FunctionalEither<List<ResultError>, ClosedTransaction> commit(OngoingLocalTransaction transaction, String... queries) {
+    public FunctionalEither<List<Fault>, ClosedTransaction> commit(OngoingLocalTransaction transaction, String... queries) {
         return map(
             executeAll(stream(queries)),
             transaction.getTransaction(),
@@ -80,7 +80,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     @Override
-    public FunctionalEither<List<ResultError>, ClosedTransaction> rollback(OngoingLocalTransaction transaction) {
+    public FunctionalEither<List<Fault>, ClosedTransaction> rollback(OngoingLocalTransaction transaction) {
         return map(
             Collections.emptyList(),
             transaction.getTransaction(),
@@ -90,7 +90,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
         );
     }
 
-    private FunctionalEither<List<ResultError>, OngoingLocalTransaction> executeInTransaction(Transaction transaction, String[] queries) {
+    private FunctionalEither<List<Fault>, OngoingLocalTransaction> executeInTransaction(Transaction transaction, String[] queries) {
         return map(
             executeAll(stream(queries)),
             transaction,
@@ -100,13 +100,13 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
         );
     }
 
-    private <T> FunctionalEither<List<ResultError>, T> map(List<FunctionalEither<ResultError, Result>> results,
-                                                        Transaction transaction,
-                                                        Consumer<Transaction> onError,
-                                                        Consumer<Transaction> onSuccess,
-                                                        Function<List<ResultData>, T> resultMapper) {
+    private <T> FunctionalEither<List<Fault>, T> map(List<FunctionalEither<Fault, Result>> results,
+                                                     Transaction transaction,
+                                                     Consumer<Transaction> onError,
+                                                     Consumer<Transaction> onSuccess,
+                                                     Function<List<Data>, T> resultMapper) {
 
-        List<ResultError> errors = collectErrors(results);
+        List<Fault> errors = collectErrors(results);
         if (!errors.isEmpty()) {
             onError.accept(transaction);
             return FunctionalEither.left(errors);
@@ -116,14 +116,14 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
         return FunctionalEither.right(this.collectResults(results, resultMapper));
     }
 
-    private List<ResultError> collectErrors(List<FunctionalEither<ResultError, Result>> rawResults) {
+    private List<Fault> collectErrors(List<FunctionalEither<Fault, Result>> rawResults) {
         return rawResults.stream()
             .filter(FunctionalEither::isLeft)
             .map(FunctionalEither::getLeft)
             .collect(Collectors.toList());
     }
 
-    private <T> T collectResults(List<FunctionalEither<ResultError, Result>> rawResults, Function<List<ResultData>, T> resultExtractor) {
+    private <T> T collectResults(List<FunctionalEither<Fault, Result>> rawResults, Function<List<Data>, T> resultExtractor) {
         return resultExtractor.apply(
             rawResults.stream()
                 .map(FunctionalEither::getRight)
@@ -131,26 +131,26 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
                 .collect(Collectors.toList()));
     }
 
-    private List<FunctionalEither<ResultError, Result>> executeAll(String query, String[] queries) {
+    private List<FunctionalEither<Fault, Result>> executeAll(String query, String[] queries) {
         Stream<String> allQueries = Stream.concat(Stream.of(query), Arrays.stream(queries));
         return executeAll(allQueries);
     }
 
-    private List<FunctionalEither<ResultError, Result>> executeAll(Stream<String> stream) {
+    private List<FunctionalEither<Fault, Result>> executeAll(Stream<String> stream) {
         return stream.map(this::execute).collect(Collectors.toList());
     }
 
-    private FunctionalEither<ResultError, Result> execute(String query) {
+    private FunctionalEither<Fault, Result> execute(String query) {
         try {
             return FunctionalEither.right(graphDatabase.execute(query));
         }
         catch (QueryExecutionException exception) {
-            return FunctionalEither.left(new ResultError(exception.getStatusCode(), exception.getMessage()));
+            return FunctionalEither.left(new Fault(exception.getStatusCode(), exception.getMessage()));
         }
     }
 
-    private ResultData asResultData(Result result) {
-        return new ResultData(result.columns(), rowsOf(result));
+    private Data asResultData(Result result) {
+        return new Data(result.columns(), rowsOf(result));
     }
 
     private List<Row> rowsOf(Result result) {

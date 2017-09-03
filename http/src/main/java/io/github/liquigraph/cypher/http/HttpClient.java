@@ -18,10 +18,10 @@ package io.github.liquigraph.cypher.http;
 import com.google.gson.Gson;
 import io.github.liquigraph.cypher.ClosedTransaction;
 import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.DefaultEither;
 import io.github.liquigraph.cypher.Either;
-import io.github.liquigraph.cypher.ResultData;
-import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.Fault;
 import io.github.liquigraph.cypher.http.internal.payload.CypherExecutionError;
 import io.github.liquigraph.cypher.http.internal.payload.CypherExecutionResults;
 import io.github.liquigraph.cypher.http.internal.payload.CypherStatements;
@@ -67,14 +67,14 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
     }
 
     @Override
-    public Either<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries) {
+    public Either<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries) {
         RequestBody requestBody = requestBody(serializeQueries(prepend(query, queries)));
         Request request = singleTransaction.post(requestBody).build();
         return executeRequest(request);
     }
 
     @Override
-    public Either<List<ResultError>, OngoingRemoteTransaction> openTransaction(String... queries) {
+    public Either<List<Fault>, OngoingRemoteTransaction> openTransaction(String... queries) {
         RequestBody requestBody = requestBody(serializeQueries(asList(queries)));
         Request request = openTransaction.post(requestBody).build();
         try (Response httpResponse = httpClient.newCall(request).execute()) {
@@ -96,7 +96,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
     }
 
     @Override
-    public Either<List<ResultError>, OngoingRemoteTransaction> execute(OngoingRemoteTransaction transaction, String... queries) {
+    public Either<List<Fault>, OngoingRemoteTransaction> execute(OngoingRemoteTransaction transaction, String... queries) {
         RequestBody body = requestBody(serializeQueries(asList(queries)));
         TransactionUri location = transaction.getLocation();
         Request request = json().url(location.value()).post(body).build();
@@ -118,10 +118,10 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
     }
 
     @Override
-    public Either<List<ResultError>, ClosedTransaction> commit(OngoingRemoteTransaction transaction, String... queries) {
+    public Either<List<Fault>, ClosedTransaction> commit(OngoingRemoteTransaction transaction, String... queries) {
         RequestBody body = requestBody(serializeQueries(asList(queries)));
         TransactionUri location = transaction.getCommitLocation();
-        Either<List<ResultError>, List<ResultData>> result = executeRequest(json().url(location.value()).post(body).build());
+        Either<List<Fault>, List<Data>> result = executeRequest(json().url(location.value()).post(body).build());
 
         if (result.isLeft()) {
             return DefaultEither.left(result.getLeft());
@@ -130,7 +130,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
     }
 
     @Override
-    public Either<List<ResultError>, ClosedTransaction> rollback(OngoingRemoteTransaction transaction) {
+    public Either<List<Fault>, ClosedTransaction> rollback(OngoingRemoteTransaction transaction) {
         Request rollback = json().url(transaction.getLocation().value()).delete().build();
         try {
             httpClient.newCall(rollback).execute();
@@ -144,7 +144,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         return RequestBody.create(JSON, serialize);
     }
 
-    private Either<List<ResultError>, List<ResultData>> executeRequest(Request request) {
+    private Either<List<Fault>, List<Data>> executeRequest(Request request) {
         try (Response response = httpClient.newCall(request).execute()) {
             return parseResponse(response);
         } catch (IOException e) {
@@ -152,7 +152,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         }
     }
 
-    private Either<List<ResultError>, List<ResultData>> parseResponse(Response response) {
+    private Either<List<Fault>, List<Data>> parseResponse(Response response) {
         Either<IOException, CypherExecutionResults> payloadResult = deserializeResponse(response.body());
         if (payloadResult.isLeft()) {
             return leftIoException(payloadResult.getLeft());
@@ -164,10 +164,10 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         return DefaultEither.right(results.explode());
     }
 
-    private List<ResultError> mapErrors(List<CypherExecutionError> errors) {
-        List<ResultError> result = new ArrayList<>(errors.size());
+    private List<Fault> mapErrors(List<CypherExecutionError> errors) {
+        List<Fault> result = new ArrayList<>(errors.size());
         for (CypherExecutionError error : errors) {
-            result.add(new ResultError(error.getCode(), error.getMessage()));
+            result.add(new Fault(error.getCode(), error.getMessage()));
         }
         return result;
     }
@@ -180,8 +180,8 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         }
     }
 
-    private <R> Either<List<ResultError>, R> leftIoException(IOException e) {
-        ResultError error = new ResultError("HttpClient.Error.IOException", e.getMessage());
+    private <R> Either<List<Fault>, R> leftIoException(IOException e) {
+        Fault error = new Fault("HttpClient.Error.IOException", e.getMessage());
         return DefaultEither.left(Collections.singletonList(error));
     }
 

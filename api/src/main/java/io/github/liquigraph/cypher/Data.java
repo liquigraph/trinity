@@ -15,29 +15,34 @@
  */
 package io.github.liquigraph.cypher;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
-public class ResultError {
+public final class Data {
+    private final List<String> columns;
+    private final List<Row> rows;
 
-    private final String code;
-    private final String message;
-
-    public ResultError(String code, String message) {
-        this.code = code;
-        this.message = message;
+    public Data(String singleColumn, Row singleRow) {
+        this(Collections.singletonList(singleColumn), Collections.singletonList(singleRow));
     }
 
-    public String getCode() {
-        return code;
+    public Data(List<String> columns, List<Row> rows) {
+        this.columns = columns;
+        this.rows = rows;
     }
 
-    public String getMessage() {
-        return message;
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    public List<Row> getRows() {
+        return rows;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, message);
+        return Objects.hash(columns, rows);
     }
 
     @Override
@@ -48,16 +53,16 @@ public class ResultError {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final ResultError other = (ResultError) obj;
-        return Objects.equals(this.code, other.code)
-                && Objects.equals(this.message, other.message);
+        final Data other = (Data) obj;
+        return Objects.equals(this.columns, other.columns)
+            && Objects.equals(this.rows, other.rows);
     }
 
     @Override
     public String toString() {
-        return "ResultError{" +
-                "code='" + code + '\'' +
-                ", message='" + message + '\'' +
-                '}';
+        return "Data{" +
+            "columns=" + columns +
+            ", rows=" + rows +
+            '}';
     }
 }

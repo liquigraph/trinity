@@ -15,7 +15,7 @@
  */
 package io.github.liquigraph.cypher.neo4jv2;
 
-import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.Fault;
 import org.neo4j.cypher.CypherException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,20 +30,20 @@ public enum CypherExceptionConverter {
         this.statusGetter = method(CypherException.class, "status");
     }
 
-    public ResultError convert(CypherException cypherException) {
+    public Fault convert(CypherException cypherException) {
         if (statusGetter != null) {
             return tryBuildFromStatus(cypherException);
         }
-        return new ResultError("Neo.PreV202Error.CypherException.Unknown", cypherException.getMessage());
+        return new Fault("Neo.PreV202Error.CypherException.Unknown", cypherException.getMessage());
 
     }
 
-    private ResultError tryBuildFromStatus(CypherException cypherException) {
+    private Fault tryBuildFromStatus(CypherException cypherException) {
         try {
             return buildFromStatus(cypherException);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             cypherException.addSuppressed(e);
-            return new ResultError("NeoUnknownVersion.Error.CypherException", cypherException.getMessage());
+            return new Fault("NeoUnknownVersion.Error.CypherException", cypherException.getMessage());
         }
     }
 
@@ -55,12 +55,12 @@ public enum CypherExceptionConverter {
         }
     }
 
-    private ResultError buildFromStatus(CypherException cypherException) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private Fault buildFromStatus(CypherException cypherException) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Object status = statusGetter.invoke(cypherException);
         // TODO: cache this
         Object code = status.getClass().getMethod("code").invoke(status);
         Class<?> codeClass = code.getClass();
-        return new ResultError(
+        return new Fault(
             (String) codeClass.getMethod("serialize").invoke(code),
             String.format(
                 "%s%n%s",

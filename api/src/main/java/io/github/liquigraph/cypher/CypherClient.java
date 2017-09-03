@@ -19,13 +19,13 @@ import java.util.List;
 
 public interface CypherClient<OpenTx extends OngoingTransaction> {
 
-   Either<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries);
+   Either<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries);
 
-   Either<List<ResultError>, OpenTx> openTransaction(String... queries);
+   Either<List<Fault>, OpenTx> openTransaction(String... queries);
 
-   Either<List<ResultError>, OpenTx> execute(OpenTx transaction, String... queries);
+   Either<List<Fault>, OpenTx> execute(OpenTx transaction, String... queries);
 
-   Either<List<ResultError>, ClosedTransaction> commit(OpenTx transaction, String... queries);
+   Either<List<Fault>, ClosedTransaction> commit(OpenTx transaction, String... queries);
 
-   Either<List<ResultError>, ClosedTransaction> rollback(OpenTx transaction);
+   Either<List<Fault>, ClosedTransaction> rollback(OpenTx transaction);
 }

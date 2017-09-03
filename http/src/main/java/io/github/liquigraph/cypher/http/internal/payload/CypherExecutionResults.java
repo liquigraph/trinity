@@ -15,7 +15,7 @@
  */
 package io.github.liquigraph.cypher.http.internal.payload;
 
-import io.github.liquigraph.cypher.ResultData;
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.Row;
 
 import java.util.ArrayList;
@@ -67,12 +67,12 @@ public class CypherExecutionResults {
         this.transaction = transaction;
     }
 
-    public List<ResultData> explode() {
-        List<ResultData> resultData = new ArrayList<>(results.size());
+    public List<Data> explode() {
+        List<Data> data = new ArrayList<>(results.size());
         for (CypherExecutionResult queryResult : results) {
-            resultData.add(new ResultData(queryResult.getColumns(), populateRows(queryResult)));
+            data.add(new Data(queryResult.getColumns(), populateRows(queryResult)));
         }
-        return resultData;
+        return data;
     }
 
     private List<Row> populateRows(CypherExecutionResult singleResult) {

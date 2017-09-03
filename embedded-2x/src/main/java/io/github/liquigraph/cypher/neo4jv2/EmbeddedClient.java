@@ -17,10 +17,10 @@ package io.github.liquigraph.cypher.neo4jv2;
 
 import io.github.liquigraph.cypher.ClosedTransaction;
 import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.Data;
 import io.github.liquigraph.cypher.DefaultEither;
 import io.github.liquigraph.cypher.Either;
-import io.github.liquigraph.cypher.ResultData;
-import io.github.liquigraph.cypher.ResultError;
+import io.github.liquigraph.cypher.Fault;
 import io.github.liquigraph.cypher.Row;
 import org.neo4j.cypher.CypherException;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
@@ -45,10 +45,10 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     @Override
-    public Either<List<ResultError>, List<ResultData>> runSingleTransaction(String query, String... queries) {
+    public Either<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries) {
         try (Transaction transaction = graphDatabase.beginTx()) {
-            List<ResultError> errors = new ArrayList<>(1 + queries.length);
-            List<ResultData> data = new ArrayList<>(1 + queries.length);
+            List<Fault> errors = new ArrayList<>(1 + queries.length);
+            List<Data> data = new ArrayList<>(1 + queries.length);
             addExecutionResult(execute(query), errors, data);
             for (String nextQuery : queries) {
                 addExecutionResult(execute(nextQuery), errors, data);
@@ -63,20 +63,20 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     @Override
-    public Either<List<ResultError>, OngoingLocalTransaction> openTransaction(String... queries) {
+    public Either<List<Fault>, OngoingLocalTransaction> openTransaction(String... queries) {
         return executeQueriesInTransaction(graphDatabase.beginTx(), queries);
     }
 
     @Override
-    public Either<List<ResultError>, OngoingLocalTransaction> execute(OngoingLocalTransaction transaction, String... queries) {
+    public Either<List<Fault>, OngoingLocalTransaction> execute(OngoingLocalTransaction transaction, String... queries) {
         return executeQueriesInTransaction(transaction.getLocalTransaction(), queries);
     }
 
     @Override
-    public Either<List<ResultError>, ClosedTransaction> commit(OngoingLocalTransaction transaction, String... queries) {
+    public Either<List<Fault>, ClosedTransaction> commit(OngoingLocalTransaction transaction, String... queries) {
         try (Transaction localTransaction = transaction.getLocalTransaction()) {
-            List<ResultError> errors = new ArrayList<>(queries.length);
-            List<ResultData> data = new ArrayList<>(queries.length);
+            List<Fault> errors = new ArrayList<>(queries.length);
+            List<Data> data = new ArrayList<>(queries.length);
             for (String nextQuery : queries) {
                 addExecutionResult(execute(nextQuery), errors, data);
             }
@@ -90,18 +90,18 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     @Override
-    public Either<List<ResultError>, ClosedTransaction> rollback(OngoingLocalTransaction transaction) {
+    public Either<List<Fault>, ClosedTransaction> rollback(OngoingLocalTransaction transaction) {
         try (Transaction localTransaction = transaction.getLocalTransaction()) {
             localTransaction.failure();
             return DefaultEither.right(ClosedTransaction.ROLLED_BACK);
         }
     }
 
-    private Either<List<ResultError>, OngoingLocalTransaction> executeQueriesInTransaction(Transaction localTransaction,
-                                                                                           String[] queries) {
+    private Either<List<Fault>, OngoingLocalTransaction> executeQueriesInTransaction(Transaction localTransaction,
+                                                                                     String[] queries) {
 
-        List<ResultError> errors = new ArrayList<>(queries.length);
-        List<ResultData> data = new ArrayList<>(queries.length);
+        List<Fault> errors = new ArrayList<>(queries.length);
+        List<Data> data = new ArrayList<>(queries.length);
         for (String nextQuery : queries) {
             addExecutionResult(execute(nextQuery), errors, data);
         }
@@ -114,7 +114,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
         return DefaultEither.right(new OngoingLocalTransaction(localTransaction, data));
     }
 
-    private Either<ResultError, ResultData> execute(String query) {
+    private Either<Fault, Data> execute(String query) {
         try {
             ExecutionResult executionResult = cypherExecutor.execute(query);
             try (ResourceIterator<Map<String, Object>> resultIterator = executionResult.iterator()) {
@@ -122,7 +122,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
                 while (resultIterator.hasNext()) {
                     rows.add(new Row(asJavaMap(resultIterator.next())));
                 }
-                return DefaultEither.right(new ResultData(executionResult.columns(), rows));
+                return DefaultEither.right(new Data(executionResult.columns(), rows));
             }
         }
         catch (CypherException exception) {
@@ -130,7 +130,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
         }
     }
 
-    private void addExecutionResult(Either<ResultError, ResultData> execution, List<ResultError> errors, List<ResultData> result) {
+    private void addExecutionResult(Either<Fault, Data> execution, List<Fault> errors, List<Data> result) {
         if (execution.isLeft()) {
             errors.add(execution.getLeft());
         }
