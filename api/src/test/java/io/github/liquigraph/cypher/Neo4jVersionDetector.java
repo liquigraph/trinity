@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class Neo4jVersionDetector {
+public final class Neo4jVersionDetector {
 
     private Neo4jVersionDetector() {
         throw new UnsupportedOperationException("Static class");

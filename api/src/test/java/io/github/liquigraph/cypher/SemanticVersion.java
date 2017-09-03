@@ -54,28 +54,15 @@ public class SemanticVersion implements Comparable<SemanticVersion> {
 
     @Override
     public int compareTo(SemanticVersion version) {
-        if (this.major < version.major) {
-            return -42;
+        int majorDiff = this.major - version.major;
+        if (majorDiff != 0) {
+            return majorDiff;
         }
-        if (this.major > version.major) {
-            return 42;
+        int minorDiff = this.minor - version.minor;
+        if (minorDiff != 0) {
+            return minorDiff;
         }
-
-        if (this.minor < version.minor) {
-            return -42;
-        }
-        if (this.minor > version.minor) {
-            return 42;
-        }
-
-        if (this.patch < version.patch) {
-            return -42;
-        }
-        if (this.patch > version.patch) {
-            return 42;
-        }
-
-        return 0;
+        return this.patch - version.patch;
     }
 
     @Override
