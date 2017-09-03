@@ -34,13 +34,10 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.github.liquigraph.cypher.Assertions.assertThat;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 
 public class EmbeddedClientTest {
 

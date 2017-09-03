@@ -15,8 +15,6 @@
  */
 package io.github.liquigraph.cypher;
 
-import java.util.Properties;
-
 public enum CypherTransport {
     /**
      * Executes Cypher queries with Bolt protocol

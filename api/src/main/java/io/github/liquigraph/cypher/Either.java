@@ -16,6 +16,7 @@
 package io.github.liquigraph.cypher;
 
 public interface Either<KO, OK> {
+
     KO getLeft();
 
     boolean isLeft();

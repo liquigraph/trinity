@@ -15,17 +15,13 @@
  */
 package io.github.liquigraph.cypher.neo4jv2;
 
-import io.github.liquigraph.cypher.CypherClientLookup;
 import io.github.liquigraph.cypher.CypherClient;
+import io.github.liquigraph.cypher.CypherClientLookup;
 import io.github.liquigraph.cypher.CypherTransport;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.neo4j.kernel.impl.util.Charsets;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -22,7 +22,6 @@ import io.github.liquigraph.cypher.Either;
 import io.github.liquigraph.cypher.Fault;
 import io.github.liquigraph.cypher.Row;
 import io.github.liquigraph.cypher.http.internal.payload.TransactionDateFormatSupplier;
-import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockWebServer;
 import org.assertj.core.data.MapEntry;
 import org.junit.Before;

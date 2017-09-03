@@ -29,13 +29,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.github.liquigraph.cypher.Assertions.assertThat;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class EmbeddedClientTest {
