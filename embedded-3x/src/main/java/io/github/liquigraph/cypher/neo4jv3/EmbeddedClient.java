@@ -24,6 +24,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +40,7 @@ import static io.github.liquigraph.cypher.neo4jv3.internal.Streams.createStream;
 import static java.util.Arrays.stream;
 
 public final class EmbeddedClient implements CypherClient<OngoingLocalTransaction> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedClient.class);
 
     private GraphDatabaseService graphDatabase;
 
@@ -47,6 +50,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
 
     @Override
     public FunctionalEither<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries) {
+        LOGGER.debug("About to run {} queries in a single transaction", 1 + queries.length);
         try (Transaction transaction = graphDatabase.beginTx()) {
             return map(
                 executeAll(query, queries),
@@ -60,16 +64,19 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
 
     @Override
     public FunctionalEither<List<Fault>, OngoingLocalTransaction> openTransaction(String... queries) {
+        LOGGER.debug("About to open a transaction and run {} queries", queries.length);
         return executeInTransaction(graphDatabase.beginTx(), queries);
     }
 
     @Override
     public FunctionalEither<List<Fault>, OngoingLocalTransaction> execute(OngoingLocalTransaction ongoingTransaction, String... queries) {
+        LOGGER.debug("About to run {} queries in currently open transaction", queries.length);
         return executeInTransaction(ongoingTransaction.getTransaction(), queries);
     }
 
     @Override
     public FunctionalEither<List<Fault>, ClosedTransaction> commit(OngoingLocalTransaction transaction, String... queries) {
+        LOGGER.debug("About to run {} queries and commit open transaction", queries.length);
         return map(
             executeAll(stream(queries)),
             transaction.getTransaction(),
@@ -81,6 +88,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
 
     @Override
     public FunctionalEither<List<Fault>, ClosedTransaction> rollback(OngoingLocalTransaction transaction) {
+        LOGGER.debug("About to roll back open transaction");
         return map(
             Collections.emptyList(),
             transaction.getTransaction(),
@@ -108,6 +116,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
 
         List<Fault> errors = collectErrors(results);
         if (!errors.isEmpty()) {
+            LOGGER.warn("Encountered {} errors on {} queries", errors.size(), results.size());
             onError.accept(transaction);
             return FunctionalEither.left(errors);
         }
@@ -145,6 +154,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
             return FunctionalEither.right(graphDatabase.execute(query));
         }
         catch (QueryExecutionException exception) {
+            LOGGER.error("An unexpected error happened while executing the Cypher query", exception);
             return FunctionalEither.left(new Fault(exception.getStatusCode(), exception.getMessage()));
         }
     }
@@ -160,6 +170,7 @@ public final class EmbeddedClient implements CypherClient<OngoingLocalTransactio
     }
 
     private void rollbackAndClose(Transaction tx) {
+        LOGGER.warn("Rolling back and closing the transaction");
         tx.failure();
         tx.close();
     }

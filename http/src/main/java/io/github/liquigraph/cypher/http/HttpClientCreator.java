@@ -18,10 +18,13 @@ package io.github.liquigraph.cypher.http;
 import io.github.liquigraph.cypher.CypherClientCreator;
 import io.github.liquigraph.cypher.CypherTransport;
 import okhttp3.OkHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 public class HttpClientCreator implements CypherClientCreator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientCreator.class);
 
     @Override
     public boolean supports(CypherTransport transport) {
@@ -30,6 +33,7 @@ public class HttpClientCreator implements CypherClientCreator {
 
     @Override
     public HttpClient create(Properties properties) {
+        LOGGER.trace("About to instantiate the HTTP client");
         String baseUrl = read(properties, "cypher.http.baseurl", "the base URL of Neo4j REST API (e.g. http://localhost:7474)");
         String username = read(properties, "cypher.http.username");
         String password = read(properties, "cypher.http.password", "the user password", username == null);
@@ -55,6 +59,7 @@ public class HttpClientCreator implements CypherClientCreator {
     private static OkHttpClient createHttpClient(String username, String password) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (username != null && password != null) {
+            LOGGER.trace("Targetting Neo4j without authentication credentials");
             builder = builder.authenticator(new BasicAuthenticator(username, password));
         }
         return builder.build();

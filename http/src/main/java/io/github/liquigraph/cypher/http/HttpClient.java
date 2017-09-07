@@ -32,6 +32,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -47,7 +49,7 @@ import static io.github.liquigraph.cypher.http.internal.http.RequestBuilders.jso
 import static java.util.Arrays.asList;
 
 public final class HttpClient implements CypherClient<OngoingRemoteTransaction> {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
     private static final MediaType JSON = MediaType.parse("application/json;charset=UTF-8");
 
     private OkHttpClient httpClient;
@@ -64,18 +66,23 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         gson = new Gson();
         singleTransaction = json().url(singleTransactionUri(baseUrl));
         openTransaction = json().url(openTransactionUri(baseUrl));
+        LOGGER.info("HTTP client targets {}", baseUrl);
     }
 
     @Override
     public Either<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries) {
-        RequestBody requestBody = requestBody(serializeQueries(prepend(query, queries)));
+        List<String> allQueries = prepend(query, queries);
+        LOGGER.debug("About to run {} queries in a single transaction", allQueries.size());
+        RequestBody requestBody = requestBody(serializeQueries(allQueries));
         Request request = singleTransaction.post(requestBody).build();
         return executeRequest(request);
     }
 
     @Override
     public Either<List<Fault>, OngoingRemoteTransaction> openTransaction(String... queries) {
-        RequestBody requestBody = requestBody(serializeQueries(asList(queries)));
+        List<String> allQueries = asList(queries);
+        LOGGER.debug("About to open a transaction and run {} queries", allQueries.size());
+        RequestBody requestBody = requestBody(serializeQueries(allQueries));
         Request request = openTransaction.post(requestBody).build();
         try (Response httpResponse = httpClient.newCall(request).execute()) {
             Either<IOException, CypherExecutionResults> response = deserializeResponse(httpResponse.body());
@@ -83,6 +90,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
                 return this.leftIoException(response.getLeft());
             }
             TransactionUri location = new TransactionUri(httpResponse.header("Location"));
+            LOGGER.info("Transaction has been successfully open at URI {}", location.value());
             CypherExecutionResults payload = response.getRight();
             return DefaultEither.right(new OngoingRemoteTransaction(
                   location,
@@ -97,8 +105,10 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, OngoingRemoteTransaction> execute(OngoingRemoteTransaction transaction, String... queries) {
-        RequestBody body = requestBody(serializeQueries(asList(queries)));
+        List<String> allQueries = asList(queries);
         TransactionUri location = transaction.getLocation();
+        LOGGER.debug("About to run {} queries in currently open transaction at URI {}", allQueries.size(), location.value());
+        RequestBody body = requestBody(serializeQueries(allQueries));
         Request request = json().url(location.value()).post(body).build();
 
         try (Response httpResponse = httpClient.newCall(request).execute()) {
@@ -119,9 +129,12 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, ClosedTransaction> commit(OngoingRemoteTransaction transaction, String... queries) {
-        RequestBody body = requestBody(serializeQueries(asList(queries)));
+        List<String> allQueries = asList(queries);
+        RequestBody body = requestBody(serializeQueries(allQueries));
         TransactionUri location = transaction.getCommitLocation();
-        Either<List<Fault>, List<Data>> result = executeRequest(json().url(location.value()).post(body).build());
+        String commitUri = location.value();
+        LOGGER.debug("About to run {} queries and commit open transaction at URI {}", allQueries.size(), commitUri);
+        Either<List<Fault>, List<Data>> result = executeRequest(json().url(commitUri).post(body).build());
 
         if (result.isLeft()) {
             return DefaultEither.left(result.getLeft());
@@ -131,7 +144,9 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, ClosedTransaction> rollback(OngoingRemoteTransaction transaction) {
-        Request rollback = json().url(transaction.getLocation().value()).delete().build();
+        String uri = transaction.getLocation().value();
+        LOGGER.debug("About to roll back open transaction at URI {}", uri);
+        Request rollback = json().url(uri).delete().build();
         try {
             httpClient.newCall(rollback).execute();
             return DefaultEither.right(ClosedTransaction.ROLLED_BACK);
@@ -176,11 +191,13 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         try (Reader reader = body.charStream()) {
             return DefaultEither.right(gson.fromJson(reader, CypherExecutionResults.class));
         } catch (IOException e) {
+            LOGGER.error("An unexpected error happened while deserializing the HTTP response", e);
             return DefaultEither.left(e);
         }
     }
 
     private <R> Either<List<Fault>, R> leftIoException(IOException e) {
+        LOGGER.error("An unexpected error happened while sending the HTTP request", e);
         Fault error = new Fault("HttpClient.Error.IOException", e.getMessage());
         return DefaultEither.left(Collections.singletonList(error));
     }
@@ -189,6 +206,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         try {
             return tryParseTransactionDate(response.getTransaction().getExpires());
         } catch (ParseException e) {
+            LOGGER.error("An unexpected error happened while parsing the transaction expiry time", e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }

@@ -17,10 +17,13 @@ package io.github.liquigraph.cypher.neo4jv3;
 
 import io.github.liquigraph.cypher.CypherClientCreator;
 import io.github.liquigraph.cypher.CypherTransport;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -29,6 +32,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class EmbeddedClientCreator implements CypherClientCreator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedClientCreator.class);
 
     private final Map<String, Setting<?>> settings;
 
@@ -43,14 +47,7 @@ public class EmbeddedClientCreator implements CypherClientCreator {
 
     @Override
     public EmbeddedClient create(Properties properties) {
-        GraphDatabaseFactory factory = new GraphDatabaseFactory();
-        GraphDatabaseBuilder builder = factory.newEmbeddedDatabaseBuilder(readPath(properties));
-        properties.forEach((key, value) -> {
-            Setting<?> setting = this.fetch(key);
-            if (setting == null) return;
-            builder.setConfig(setting, value == null ? null : value.toString());
-        });
-        return new EmbeddedClient(builder.newGraphDatabase());
+        return new EmbeddedClient(newGraphDatabase(properties));
     }
 
     private static Map<String, Setting<?>> populateSettings() {
@@ -62,6 +59,18 @@ public class EmbeddedClientCreator implements CypherClientCreator {
         return settings;
     }
 
+    private GraphDatabaseService newGraphDatabase(Properties properties) {
+        GraphDatabaseFactory factory = new GraphDatabaseFactory();
+        GraphDatabaseBuilder builder = factory.newEmbeddedDatabaseBuilder(readPath(properties));
+        properties.forEach((key, value) -> {
+            Setting<?> setting = this.fetch(key);
+            if (setting == null) return;
+            LOGGER.debug("Registering configuration setting {}", setting);
+            builder.setConfig(setting, value == null ? null : value.toString());
+        });
+        return builder.newGraphDatabase();
+    }
+
     private static void putField(Field field, Map<String, Setting<?>> settings) {
         if (!Setting.class.isAssignableFrom(field.getType())) {
             return;
@@ -70,13 +79,16 @@ public class EmbeddedClientCreator implements CypherClientCreator {
         if (setting == null) {
             return;
         }
-        settings.put(field.getName(), setting);
+        String key = field.getName();
+        LOGGER.debug("Fetching field {} with value {}", key, setting);
+        settings.put(key, setting);
     }
 
     private static Setting<?> readField(Field field) {
         try {
             return (Setting<?>)field.get(null);
         } catch (IllegalAccessException e) {
+            LOGGER.debug("Cannot read static field", field.getName());
             return null;
         }
     }
@@ -86,8 +98,10 @@ public class EmbeddedClientCreator implements CypherClientCreator {
     }
 
     private File readPath(Properties properties) {
-        String property = properties.getProperty("cypher.embeddedv3.path");
+        String pathSetting = "cypher.embeddedv3.path";
+        String property = properties.getProperty(pathSetting);
         if (property == null) {
+            LOGGER.error("{} must be set to start the embedded client", pathSetting);
             throw new IllegalArgumentException("Path to Neo4j embedded instance should be set with 'neo4jv3.embedded.path'");
         }
         return new File(property);

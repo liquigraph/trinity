@@ -22,6 +22,8 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class EmbeddedClientCreator implements CypherClientCreator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedClientCreator.class);
 
     private final Map<String, Setting<?>> settings;
 
@@ -63,6 +66,7 @@ public class EmbeddedClientCreator implements CypherClientCreator {
             if (setting == null) {
                 continue;
             }
+            LOGGER.debug("Registering configuration setting {}", setting);
             builder.setConfig(setting, toString(entry.getValue()));
         }
         return builder.newGraphDatabase();
@@ -76,20 +80,25 @@ public class EmbeddedClientCreator implements CypherClientCreator {
         if (setting == null) {
             return;
         }
-        settings.put(field.getName(), setting);
+        String key = field.getName();
+        LOGGER.debug("Fetching field {} with value {}", key, setting);
+        settings.put(key, setting);
     }
 
     private static Setting<?> readField(Field field) {
         try {
             return (Setting<?>)field.get(null);
         } catch (IllegalAccessException e) {
+            LOGGER.debug("Cannot read static field", field.getName());
             return null;
         }
     }
 
     private String readPath(Properties properties) {
-        String property = properties.getProperty("cypher.embeddedv2.path");
+        String pathSetting = "cypher.embeddedv2.path";
+        String property = properties.getProperty(pathSetting);
         if (property == null) {
+            LOGGER.error("{} must be set to start the embedded client", pathSetting);
             throw new IllegalArgumentException("Path to Neo4j embedded instance should be set with 'neo4jv2.embedded.path'");
         }
         return property;
