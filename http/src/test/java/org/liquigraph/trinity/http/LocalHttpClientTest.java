@@ -42,7 +42,7 @@ import static org.liquigraph.trinity.http.MockResponses.jsonOkResponse;
 import static org.liquigraph.trinity.http.MockResponses.jsonResponse;
 import static org.assertj.core.data.MapEntry.entry;
 
-public class HttpClientTest {
+public class LocalHttpClientTest {
 
     private MockWebServer neo4jServer;
     private CypherClient<OngoingRemoteTransaction> subject;

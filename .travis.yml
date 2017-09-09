@@ -1,0 +1,49 @@
+sudo: required
+cache:
+  directories:
+    - $HOME/.m2
+language: java
+services:
+  - docker
+before_install:
+  - jdk_switcher use openjdk7
+  - sed -i "s|\[JDK7_HOME\]|$JAVA_HOME|g" etc/toolchains.xml
+  - jdk_switcher use oraclejdk8
+  - sed -i "s|\[JDK8_HOME\]|$JAVA_HOME|g" etc/toolchains.xml
+jdk:
+  - oraclejdk8
+os:
+  - linux
+env:
+  matrix:
+    ### Neo4j v2 build
+    - NEO_VERSION=2.0.0
+      PROJECTS=http,embedded-2x,trinity-neo4j-v2
+    - NEO_VERSION=2.0.5
+      PROJECTS=http,embedded-2x,trinity-neo4j-v2
+    - NEO_VERSION=2.1.8
+      PROJECTS=http,embedded-2x,trinity-neo4j-v2
+    - NEO_VERSION=2.2.10
+      PROJECTS=http,embedded-2x,trinity-neo4j-v2
+      EXTRA_PROFILES=-Pwith-neo4j-io
+    - NEO_VERSION=2.3.11
+      PROJECTS=http,embedded-2x,trinity-neo4j-v2
+      EXTRA_PROFILES=-Pwith-neo4j-io
+      WITH_DOCKER=true
+    ### Neo4j v3 build
+    - NEO_VERSION=3.0.0
+      PROJECTS=http,embedded-3x,trinity-neo4j-v3
+      WITH_DOCKER=true
+    - NEO_VERSION=3.0.11
+      PROJECTS=http,embedded-3x,trinity-neo4j-v3
+      WITH_DOCKER=true
+    - NEO_VERSION=3.1.6
+      PROJECTS=http,embedded-3x,trinity-neo4j-v3
+      WITH_DOCKER=true
+    - NEO_VERSION=3.2.3
+      PROJECTS=http,embedded-3x,trinity-neo4j-v3
+      WITH_DOCKER=true
+      EXTRA_PROFILES=-Pwith-neo4j-common
+install:
+  - mvn install -DskipTests=true -B -V -t etc/toolchains.xml
+script: etc/run.sh
