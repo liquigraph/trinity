@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.liquigraph</groupId>
-        <artifactId>cypher-client-parent</artifactId>
+        <groupId>org.liquigraph.trinity</groupId>
+        <artifactId>trinity-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cypher-embedded-client-2x</artifactId>
-    <name>Cypher Client - Embedded Neo4j (2.x)</name>
+    <artifactId>trinity-embedded-2x</artifactId>
+    <name>Trinity - Embedded Neo4j (2.x)</name>
 
     <properties>
         <neo4j.version>2.0.0</neo4j.version>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>cypher-client-api</artifactId>
+            <artifactId>trinity-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>cypher-client-api</artifactId>
+            <artifactId>trinity-api</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -51,6 +51,11 @@
             <artifactId>neo4j-kernel</artifactId>
             <version>${neo4j.version}</version>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

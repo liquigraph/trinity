@@ -1,0 +1,252 @@
+= Trinity
+
+https://neo4j.com/[Neo4j] is a graph database.
+
+https://neo4j.com/developer/cypher-query-language/[Cypher] is Neo4j's query language.
+
+Trinity is the preferred choice to run Cypher queries for client applications and
+libraries running on the Java Virtual Machine.
+
+== Why Trinity?
+
+While working on http://www.liquigraph.org/[Liquigraph], we realized that
+having to keep several branches per Neo4j version was a pain.
+
+This was mainly due to the fact there was no JDBC driver supporting both Neo4j v2 and Neo4j v3.
+
+Moreover, we did not need a full-fledged JDBC implementation, we just needed
+to run Cypher queries.
+
+And then, Trinity was born! With a simple API in mind, some build and
+implementation tricks to work around Neo4j incompatibilities,
+we achieved what we wanted: having a single way to run Cypher with any
+Neo4j setup.
+
+Why the name?
+
+ . Because badass women for the win!
+ . And also because https://twitter.com/fbiville/status/905850499215347715[Twitter]!
+
+== Minimum Viable Snippet
+
+=== Bolt
+
+Soon.
+
+=== HTTP
+
+[source,java]
+----
+package in.da.matrix;
+
+import org.liquigraph.trinity.Data;
+import org.liquigraph.trinity.Either;
+import org.liquigraph.trinity.Fault;
+import org.liquigraph.trinity.http.BasicAuthenticator;
+import org.liquigraph.trinity.http.HttpClient;
+import java.util.List;
+import okhttp3.OkHttpClient;
+
+public class TrinityHttpExample {
+
+    public static void main(String... args) {
+        // if auth is disabled, just use: new HttpClient("http://localhost:7474")
+        HttpClient trinity = new HttpClient(
+            "http://localhost:7474",
+            okHttpClient("neo4j", "s3cr3t")
+        );
+
+        Either<List<Fault>, List<Data>> either =
+            trinity.runSingleTransaction("MATCH (n:Crew) RETURN COUNT(n)");
+
+        if (either.isRight()) {
+            List<Data> data = either.getRight();
+            // do something amazing with it
+        }
+    }
+
+    private static OkHttpClient okHttpClient(String username, String password) {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder = builder.authenticator(new BasicAuthenticator(username, password));
+        return builder.build();
+    }
+}
+----
+=== Embedded for Neo4j v3
+
+[source,java]
+----
+package in.da.matrix;
+
+import org.liquigraph.trinity.neo4jv3.EmbeddedClient;
+import org.liquigraph.trinity.Data;
+import org.liquigraph.trinity.Either;
+import org.liquigraph.trinity.Fault;
+import java.nio.file.Paths;
+import java.util.List;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+
+public class TrinityEmbeddedV3Example {
+
+    public static void main(String... args) {
+        File path = Paths.get("some", "path").toFile();
+        EmbeddedClient trinity = new EmbeddedClient(graphDatabase(path));
+
+        Either<List<Fault>, List<Data>> either =
+            trinity.runSingleTransaction("MATCH (n:Crew) RETURN COUNT(n)");
+
+        if (either.isRight()) {
+            List<Data> data = either.getRight();
+            // do something amazing with it
+        }
+    }
+
+    private static GraphDatabaseService graphDatabase(File path) {
+        return new GraphDatabaseFactory().newEmbeddedDatabase(path);
+    }
+}
+----
+
+=== Embedded for Neo4j v2
+
+[source,java]
+----
+package in.da.matrix;
+
+import org.liquigraph.trinity.neo4jv2.EmbeddedClient;
+import org.liquigraph.trinity.Data;
+import org.liquigraph.trinity.Either;
+import org.liquigraph.trinity.Fault;
+import java.util.List;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+
+public class TrinityEmbeddedV2Example {
+
+    public static void main(String... args) {
+        EmbeddedClient trinity = new EmbeddedClient(graphDatabase("/some/path"));
+
+        Either<List<Fault>, List<Data>> either =
+            trinity.runSingleTransaction("MATCH (n:Crew) RETURN COUNT(n)");
+
+        if (either.isRight()) {
+            List<Data> data = either.getRight();
+            // do something amazing with it
+        }
+    }
+
+    private static GraphDatabaseService graphDatabase(String path) {
+        return new GraphDatabaseFactory().newEmbeddedDatabase(path);
+    }
+}
+----
+
+
+
+== Download
+
+=== Application developers
+
+Picking the right implementation is just a matter of selecting the right artifact:
+[cols="3*", options="header"]
+.Trinity artefact matrix (_pun absolutely intended_)
+|===
+|Artifact coordinates
+|Version of Neo4j
+|JRE prerequisites
+
+|`trinity-embedded-2x`
+|2.0.0 to latest 2.x
+|JRE 7 or later
+
+|`trinity-embedded-3x`
+|3.0.0 to latest 3.x
+|JRE 8 or later
+
+|`trinity-http`
+|2.0.0 to latest 3.x
+|JRE 7 or later
+
+|`trinity-bolt`
+|3.0.0 to latest 3.x
+|JRE 8 or later
+|===
+
+[NOTE]
+====
+Trinity `groupId` is always `org.liquigraph.trinity`.
+If you pick Trinity for Neo4j embedded v2, then you must add the dependency:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.liquigraph.trinity</groupId>
+    <artifactId>trinity-embedded-2x</artifactId>
+    <version><!-- CURRENT VERSION --></version>
+</dependency>
+----
+====
+
+=== Library developers
+
+If you develop a library to needs to support several Neo4j setups as well,
+you can pick any of the two bundles:
+
+ - Neo4j 2:
+[source,xml]
+----
+<dependency>
+    <groupId>org.liquigraph.trinity</groupId>
+    <artifactId>trinity-neo4j-v2</artifactId>
+    <version><!-- CURRENT VERSION --></version>
+</dependency>
+----
+
+ - Neo4j 3:
+[source,xml]
+----
+<dependency>
+    <groupId>org.liquigraph.trinity</groupId>
+    <artifactId>trinity-neo4j-v3</artifactId>
+    <version><!-- CURRENT VERSION --></version>
+</dependency>
+----
+
+Please note that Trinity instance discovery is implemented
+via the good old Java https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html[Service Provider Interfaces].
+
+To retrieve a Trinity instance, one just needs to include one of the two
+bundles and use `org.liquigraph.trinity.CypherClientLookup` like in the example below:
+
+[source,java]
+----
+package in.da.matrix;
+
+import org.liquigraph.trinity.CypherClientLookup;
+import org.liquigraph.trinity.CypherTransport;
+import java.util.Properties;
+
+public class TrinityHttpDiscoveryExample {
+
+    public static void main(String... args) {
+        CypherClientLookup lookup = new CypherClientLookup();
+        CypherClient<? extends OngoingTransaction> trinity = lookup.getInstance(
+            CypherTransport.HTTP,
+            httpProperties()
+        );
+
+        // then you can run Cypher queries as in the above examples
+    }
+
+    private static Properties httpProperties() {
+        Properties props = new Properties();
+        props.setProperty("cypher.http.baseurl", "http://localhost:7474");
+        props.setProperty("cypher.http.username", "neo4j");
+        props.setProperty("cypher.http.password", "s3cr3t");
+        return props;
+    }
+}
+----
+
+

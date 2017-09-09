@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.liquigraph</groupId>
-        <artifactId>cypher-client-parent</artifactId>
+        <groupId>org.liquigraph.trinity</groupId>
+        <artifactId>trinity-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cypher-http-client</artifactId>
-    <name>Cypher Client - HTTP</name>
+    <artifactId>trinity-http</artifactId>
+    <name>Trinity - HTTP</name>
 
     <properties>
         <okhttp.version>3.8.1</okhttp.version>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>cypher-client-api</artifactId>
+            <artifactId>trinity-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>cypher-client-api</artifactId>
+            <artifactId>trinity-api</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -66,6 +66,11 @@
         <dependency>
             <groupId>com.pholser</groupId>
             <artifactId>junit-quickcheck-generators</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
