@@ -7,6 +7,10 @@ https://neo4j.com/developer/cypher-query-language/[Cypher] is Neo4j's query lang
 Trinity is the preferred choice to run Cypher queries for client applications and
 libraries running on the Java Virtual Machine.
 
+== Build status
+
+image:https://travis-ci.org/liquigraph/trinity.svg?branch=master["Build Status", link="https://travis-ci.org/liquigraph/trinity"]
+
 == Why Trinity?
 
 While working on http://www.liquigraph.org/[Liquigraph], we realized that
