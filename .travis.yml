@@ -47,3 +47,5 @@ env:
 install:
   - mvn install -DskipTests=true -B -V -t etc/toolchains.xml
 script: etc/run.sh
+after_success:
+  - "[ ${TRAVIS_PULL_REQUEST} = 'false' ] && [[ ${TRAVIS_BRANCH} = 'master' ]] && mvn -q clean deploy -DskipTests -B -V -t etc/toolchains.xml  --settings ./etc/deploy-settings.xml"
