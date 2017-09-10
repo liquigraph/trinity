@@ -194,7 +194,7 @@ If you pick Trinity for Neo4j embedded v2, then you must add the dependency:
 
 === Library developers
 
-If you develop a library to needs to support several Neo4j setups as well,
+If you develop a library that needs to support several Neo4j setups as well,
 you can pick any of the two bundles:
 
  - Neo4j 2:
@@ -216,6 +216,11 @@ you can pick any of the two bundles:
     <version><!-- CURRENT VERSION --></version>
 </dependency>
 ----
+
+[NOTE]
+====
+These two bundles cannot be included together, as they require different versions of Neo4j and JRE.
+====
 
 Please note that Trinity instance discovery is implemented
 via the good old Java https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html[Service Provider Interfaces].
