@@ -15,11 +15,26 @@
  */
 package org.liquigraph.trinity.http.internal.payload;
 
+import org.liquigraph.trinity.CypherQuery;
+
+import java.util.Map;
 import java.util.Objects;
 
 public class CypherStatement {
 
     private String statement;
+    private Map<String, Object> params;
+
+    public static CypherStatement create(CypherQuery query) {
+        return create(query.getQuery(), query.getParameters());
+    }
+
+    private static CypherStatement create(String query, Map<String, Object> params) {
+        CypherStatement statement = new CypherStatement();
+        statement.setStatement(query);
+        statement.setParams(params);
+        return statement;
+    }
 
     public String getStatement() {
         return statement;
@@ -27,6 +42,14 @@ public class CypherStatement {
 
     public void setStatement(String statement) {
         this.statement = statement;
+    }
+
+    public Map<String, Object> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 
     @Override
@@ -44,11 +67,5 @@ public class CypherStatement {
         }
         final CypherStatement other = (CypherStatement) obj;
         return Objects.equals(this.statement, other.statement);
-    }
-
-    public static CypherStatement create(String query) {
-        CypherStatement statement = new CypherStatement();
-        statement.setStatement(query);
-        return statement;
     }
 }

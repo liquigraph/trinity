@@ -15,6 +15,8 @@
  */
 package org.liquigraph.trinity.http.internal.payload;
 
+import org.liquigraph.trinity.CypherQuery;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +32,9 @@ public class CypherStatements {
         this.statements = statements;
     }
 
-    public static CypherStatements create(List<String> queries) {
+    public static CypherStatements create(List<CypherQuery> queries) {
         List<CypherStatement> statements = new ArrayList<>(queries.size());
-        for (String query : queries) {
+        for (CypherQuery query : queries) {
             statements.add(CypherStatement.create(query));
         }
         CypherStatements result = new CypherStatements();

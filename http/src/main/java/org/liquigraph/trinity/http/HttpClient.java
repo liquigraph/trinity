@@ -16,22 +16,24 @@
 package org.liquigraph.trinity.http;
 
 import com.google.gson.Gson;
-import org.liquigraph.trinity.ClosedTransaction;
-import org.liquigraph.trinity.CypherClient;
-import org.liquigraph.trinity.Data;
-import org.liquigraph.trinity.DefaultEither;
-import org.liquigraph.trinity.Either;
-import org.liquigraph.trinity.Fault;
-import org.liquigraph.trinity.http.internal.payload.CypherExecutionError;
-import org.liquigraph.trinity.http.internal.payload.CypherExecutionResults;
-import org.liquigraph.trinity.http.internal.payload.CypherStatements;
-import org.liquigraph.trinity.http.internal.payload.TransactionDateFormatSupplier;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.liquigraph.trinity.ClosedTransaction;
+import org.liquigraph.trinity.CypherClient;
+import org.liquigraph.trinity.CypherQuery;
+import org.liquigraph.trinity.Data;
+import org.liquigraph.trinity.DefaultEither;
+import org.liquigraph.trinity.Either;
+import org.liquigraph.trinity.Fault;
+import org.liquigraph.trinity.SimpleCypherQuery;
+import org.liquigraph.trinity.http.internal.payload.CypherExecutionError;
+import org.liquigraph.trinity.http.internal.payload.CypherExecutionResults;
+import org.liquigraph.trinity.http.internal.payload.CypherStatements;
+import org.liquigraph.trinity.http.internal.payload.TransactionDateFormatSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +44,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.liquigraph.trinity.http.internal.collection.Lists.prepend;
 import static org.liquigraph.trinity.http.internal.http.Endpoints.openTransactionUri;
 import static org.liquigraph.trinity.http.internal.http.Endpoints.singleTransactionUri;
 import static org.liquigraph.trinity.http.internal.http.RequestBuilders.json;
-import static java.util.Arrays.asList;
 
 public final class HttpClient implements CypherClient<OngoingRemoteTransaction> {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);
@@ -71,7 +73,15 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries) {
-        List<String> allQueries = prepend(query, queries);
+        return runSingleTransaction(
+            new SimpleCypherQuery(query),
+            asSimpleQueries(queries)
+        );
+    }
+
+    @Override
+    public Either<List<Fault>, List<Data>> runSingleTransaction(CypherQuery query, CypherQuery... queries) {
+        List<CypherQuery> allQueries = prepend(query, queries);
         LOGGER.debug("About to run {} queries in a single transaction", allQueries.size());
         RequestBody requestBody = requestBody(serializeQueries(allQueries));
         Request request = singleTransaction.post(requestBody).build();
@@ -80,7 +90,16 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, OngoingRemoteTransaction> openTransaction(String... queries) {
-        List<String> allQueries = asList(queries);
+        CypherQuery[] simpleQueries = asSimpleQueries(queries);
+        return openTransaction(asList(simpleQueries));
+    }
+
+    @Override
+    public Either<List<Fault>, OngoingRemoteTransaction> openTransaction(CypherQuery first, CypherQuery... queries) {
+        return openTransaction(prepend(first, queries));
+    }
+
+    private Either<List<Fault>, OngoingRemoteTransaction> openTransaction(List<CypherQuery> allQueries) {
         LOGGER.debug("About to open a transaction and run {} queries", allQueries.size());
         RequestBody requestBody = requestBody(serializeQueries(allQueries));
         Request request = openTransaction.post(requestBody).build();
@@ -93,10 +112,10 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
             LOGGER.info("Transaction has been successfully open at URI {}", location.value());
             CypherExecutionResults payload = response.getRight();
             return DefaultEither.right(new OngoingRemoteTransaction(
-                  location,
-                  expiryTime(payload),
-                  new TransactionUri(payload.getCommit()),
-                  payload.explode()
+                location,
+                expiryTime(payload),
+                new TransactionUri(payload.getCommit()),
+                payload.explode()
             ));
         } catch (IOException e) {
             return this.leftIoException(e);
@@ -105,7 +124,12 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, OngoingRemoteTransaction> execute(OngoingRemoteTransaction transaction, String... queries) {
-        List<String> allQueries = asList(queries);
+        return execute(transaction, asSimpleQueries(queries));
+    }
+
+    @Override
+    public Either<List<Fault>, OngoingRemoteTransaction> execute(OngoingRemoteTransaction transaction, CypherQuery... queries) {
+        List<CypherQuery> allQueries = asList(queries);
         TransactionUri location = transaction.getLocation();
         LOGGER.debug("About to run {} queries in currently open transaction at URI {}", allQueries.size(), location.value());
         RequestBody body = requestBody(serializeQueries(allQueries));
@@ -118,10 +142,10 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
             }
             CypherExecutionResults payload = response.getRight();
             return DefaultEither.right(new OngoingRemoteTransaction(
-                  location,
-                  expiryTime(payload),
-                  new TransactionUri(payload.getCommit()),
-                  payload.explode()));
+                location,
+                expiryTime(payload),
+                new TransactionUri(payload.getCommit()),
+                payload.explode()));
         } catch (IOException e) {
             return this.leftIoException(e);
         }
@@ -129,7 +153,17 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
 
     @Override
     public Either<List<Fault>, ClosedTransaction> commit(OngoingRemoteTransaction transaction, String... queries) {
-        List<String> allQueries = asList(queries);
+        CypherQuery[] simpleQueries = asSimpleQueries(queries);
+        return commit(transaction, asList(simpleQueries));
+    }
+
+    @Override
+    public Either<List<Fault>, ClosedTransaction> commit(OngoingRemoteTransaction transaction, CypherQuery query, CypherQuery... queries) {
+        List<CypherQuery> allQueries = asList(queries);
+        return commit(transaction, allQueries);
+    }
+
+    private Either<List<Fault>, ClosedTransaction> commit(OngoingRemoteTransaction transaction, List<CypherQuery> allQueries) {
         RequestBody body = requestBody(serializeQueries(allQueries));
         TransactionUri location = transaction.getCommitLocation();
         String commitUri = location.value();
@@ -202,6 +236,15 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         return DefaultEither.left(Collections.singletonList(error));
     }
 
+    private static CypherQuery[] asSimpleQueries(String[] queries) {
+        int size = queries.length;
+        CypherQuery[] result = new CypherQuery[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = new SimpleCypherQuery(queries[i]);
+        }
+        return result;
+    }
+
     private static long expiryTime(CypherExecutionResults response) {
         try {
             return tryParseTransactionDate(response.getTransaction().getExpires());
@@ -215,7 +258,7 @@ public final class HttpClient implements CypherClient<OngoingRemoteTransaction> 
         return TransactionDateFormatSupplier.get().parse(expires).getTime();
     }
 
-    private String serializeQueries(List<String> queries) {
+    private String serializeQueries(List<CypherQuery> queries) {
         return gson.toJson(CypherStatements.create(queries));
     }
 }

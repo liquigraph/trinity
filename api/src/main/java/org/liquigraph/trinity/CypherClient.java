@@ -21,11 +21,19 @@ public interface CypherClient<OpenTx extends OngoingTransaction> {
 
    Either<List<Fault>, List<Data>> runSingleTransaction(String query, String... queries);
 
+   Either<List<Fault>, List<Data>> runSingleTransaction(CypherQuery query, CypherQuery... queries);
+
    Either<List<Fault>, OpenTx> openTransaction(String... queries);
+
+   Either<List<Fault>, OpenTx> openTransaction(CypherQuery query, CypherQuery... queries);
 
    Either<List<Fault>, OpenTx> execute(OpenTx transaction, String... queries);
 
+   Either<List<Fault>, OpenTx> execute(OpenTx transaction, CypherQuery... queries);
+
    Either<List<Fault>, ClosedTransaction> commit(OpenTx transaction, String... queries);
+
+   Either<List<Fault>, ClosedTransaction> commit(OpenTx transaction, CypherQuery query, CypherQuery... queries);
 
    Either<List<Fault>, ClosedTransaction> rollback(OpenTx transaction);
 }
