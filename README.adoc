@@ -234,18 +234,26 @@ package in.da.matrix;
 
 import org.liquigraph.trinity.CypherClientLookup;
 import org.liquigraph.trinity.CypherTransport;
+import org.liquigraph.trinity.OngoingTransaction;
+import org.liquigraph.trinity.Optional; // for trinity-neo4j-v2
+import java.util.Optional; // for trinity-neo4j-v3
 import java.util.Properties;
 
 public class TrinityHttpDiscoveryExample {
 
     public static void main(String... args) {
         CypherClientLookup lookup = new CypherClientLookup();
-        CypherClient<? extends OngoingTransaction> trinity = lookup.getInstance(
+        Optional<CypherClient<OngoingTransaction>> maybeTrinity = lookup.getInstance(
             CypherTransport.HTTP,
             httpProperties()
         );
 
-        // then you can run Cypher queries as in the above examples
+        // trinity-neo4j-v3 users can rely on the primitive Java 8 Optional
+        // they are encouraged to use instead maybeTrinity.ifPresent(trinity -> ...)
+        if (maybeTrinity.isPresent()) {
+            CypherClient<OngoingTransaction> trinity = maybeTrinity.get();
+            // then you can run Cypher queries as in the above examples
+        }
     }
 
     private static Properties httpProperties() {

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
@@ -32,18 +31,20 @@ public final class CypherClientLookup {
         services = ServiceLoader.load(CypherClientCreator.class).iterator();
     }
 
-    public CypherClient<? extends OngoingTransaction> getInstance(CypherTransport transport, Properties configuration) {
+    public Optional<CypherClient<OngoingTransaction>> getInstance(CypherTransport transport, Properties configuration) {
         LOGGER.debug("Starting Cypher client discovery for transport {}", transport);
+        return lookUp(transport, configuration);
+    }
+
+    private Optional<CypherClient<OngoingTransaction>> lookUp(CypherTransport transport, Properties configuration) {
         while (services.hasNext()) {
             CypherClientCreator creator = services.next();
             if (creator.supports(transport)) {
                 LOGGER.info("Found implementation of type {} for transport {}", creator.getClass(), transport);
-                return creator.create(configuration);
+                return Optional.of(creator.create(configuration));
             }
         }
         LOGGER.error("No implementations could be found for {}", transport);
-        throw new NoSuchElementException(
-            String.format("Could not find any Cypher Client supporting transport: %s", transport)
-        );
+        return Optional.empty();
     }
 }

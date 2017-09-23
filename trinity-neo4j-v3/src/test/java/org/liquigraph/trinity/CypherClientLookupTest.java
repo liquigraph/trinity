@@ -15,11 +15,11 @@
  */
 package org.liquigraph.trinity;
 
-import org.liquigraph.trinity.http.HttpClient;
-import org.liquigraph.trinity.neo4jv3.EmbeddedClient;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.liquigraph.trinity.http.HttpClient;
+import org.liquigraph.trinity.neo4jv3.EmbeddedClient;
 
 import java.util.Properties;
 
@@ -36,11 +36,11 @@ public class CypherClientLookupTest {
         assertThat(subject.getInstance(
             CypherTransport.EMBEDDED_3,
             $("cypher.embeddedv3.path", folder.newFolder().getPath())
-        )).isInstanceOf(EmbeddedClient.class);
+        ).get()).isInstanceOf(EmbeddedClient.class);
         assertThat(subject.getInstance(
             CypherTransport.HTTP,
             $("cypher.http.baseurl", "http://localhost:7474")
-        )).isInstanceOf(HttpClient.class);
+        ).get()).isInstanceOf(HttpClient.class);
         //TODO: add Bolt when ready
     }
 

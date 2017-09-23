@@ -10,6 +10,11 @@
     <artifactId>trinity-neo4j-v3</artifactId>
     <name>All Trinity Implementations (Neo4j 3.x)</name>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

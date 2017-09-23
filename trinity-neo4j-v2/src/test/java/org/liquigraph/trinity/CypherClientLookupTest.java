@@ -36,11 +36,11 @@ public class CypherClientLookupTest {
         assertThat(subject.getInstance(
             CypherTransport.EMBEDDED_2,
             $("cypher.embeddedv2.path", folder.newFolder().getPath())
-        )).isInstanceOf(EmbeddedClient.class);
+        ).get()).isInstanceOf(EmbeddedClient.class);
         assertThat(subject.getInstance(
             CypherTransport.HTTP,
             $("cypher.http.baseurl", "http://localhost:7474")
-        )).isInstanceOf(HttpClient.class);
+        ).get()).isInstanceOf(HttpClient.class);
     }
 
     private Properties $(String key, String value) {
