@@ -20,6 +20,7 @@ import org.liquigraph.trinity.CypherClient;
 import org.liquigraph.trinity.Data;
 import org.liquigraph.trinity.Fault;
 import org.liquigraph.trinity.Row;
+import org.liquigraph.trinity.neo4jv3.internal.FunctionalEither;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;

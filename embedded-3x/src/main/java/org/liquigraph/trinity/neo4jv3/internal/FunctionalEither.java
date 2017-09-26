@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.liquigraph.trinity.neo4jv3;
-
-import org.liquigraph.trinity.Either;
+package org.liquigraph.trinity.neo4jv3.internal;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.liquigraph.trinity.Either;
 
 public final class FunctionalEither<KO, OK> implements Either<KO, OK> {
 
