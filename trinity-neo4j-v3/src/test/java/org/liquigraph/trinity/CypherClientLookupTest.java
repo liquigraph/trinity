@@ -17,9 +17,12 @@ package org.liquigraph.trinity;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.liquigraph.trinity.bolt.BoltClient;
 import org.liquigraph.trinity.http.HttpClient;
 import org.liquigraph.trinity.neo4jv3.EmbeddedClient;
+import org.neo4j.harness.junit.Neo4jRule;
 
 import java.util.Properties;
 
@@ -27,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CypherClientLookupTest {
 
+    @Rule public Neo4jRule neo4j = new Neo4jRule();
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
@@ -39,9 +43,12 @@ public class CypherClientLookupTest {
         ).get()).isInstanceOf(EmbeddedClient.class);
         assertThat(subject.getInstance(
             CypherTransport.HTTP,
-            $("cypher.http.baseurl", "http://localhost:7474")
+            $("cypher.http.baseurl", neo4j.httpURI().toString())
         ).get()).isInstanceOf(HttpClient.class);
-        //TODO: add Bolt when ready
+        assertThat(subject.getInstance(
+            CypherTransport.BOLT,
+            $("cypher.bolt.baseurl", neo4j.boltURI().toString())
+        ).get()).isInstanceOf(BoltClient.class);
     }
 
     private Properties $(String key, String value) {

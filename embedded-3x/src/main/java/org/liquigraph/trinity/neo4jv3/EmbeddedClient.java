@@ -20,7 +20,7 @@ import org.liquigraph.trinity.CypherClient;
 import org.liquigraph.trinity.Data;
 import org.liquigraph.trinity.Fault;
 import org.liquigraph.trinity.Row;
-import org.liquigraph.trinity.neo4jv3.internal.FunctionalEither;
+import org.liquigraph.trinity.internal.FunctionalEither;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
@@ -37,7 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.liquigraph.trinity.neo4jv3.internal.Streams.createStream;
+import static org.liquigraph.trinity.internal.Streams.createStream;
 import static java.util.Arrays.stream;
 
 public final class EmbeddedClient implements CypherClient<OngoingLocalTransaction> {

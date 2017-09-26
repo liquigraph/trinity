@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.liquigraph.trinity.neo4jv3.internal;
+package org.liquigraph.trinity.internal;
 
 import java.util.Iterator;
 import java.util.Spliterators;

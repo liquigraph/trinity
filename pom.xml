@@ -19,9 +19,11 @@
 
     <modules>
         <module>api</module>
+        <module>java8-utilities</module>
         <module>http</module>
         <module>embedded-2x</module>
         <module>embedded-3x</module>
+        <module>bolt</module>
         <module>trinity-neo4j-v2</module>
         <module>trinity-neo4j-v3</module>
     </modules>
@@ -31,6 +33,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>trinity-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>java8-utilities</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

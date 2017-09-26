@@ -35,7 +35,39 @@ Why the name?
 
 === Bolt
 
-Soon.
+
+[source,java]
+----
+package in.da.matrix;
+
+import org.liquigraph.trinity.bolt.BoltClient;
+import org.neo4j.driver.v1.AuthToken;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.GraphDatabase;
+
+import java.util.List;
+
+public class TrinityBoltExample {
+
+    public static void main(String[] args) {
+        AuthToken authentication = AuthTokens.basic("neo4j", "toto");
+        try (BoltClient trinity =
+             new BoltClient(GraphDatabase.driver("bolt://localhost:7687", authentication))) {
+
+            trinity.runSingleTransaction("MATCH (n:Crew) RETURN COUNT(n)")
+               .consume(
+                   (List<Fault> errors) -> {
+                       // do something amazingly useful
+                   },
+                   (List<Data> data) -> {
+                       // do something usefully amazing with it
+                   }
+               );
+        }
+    }
+}
+
+----
 
 === HTTP
 
@@ -65,7 +97,11 @@ public class TrinityHttpExample {
 
         if (either.isRight()) {
             List<Data> data = either.getRight();
-            // do something amazing with it
+            // do something usefully amazing with it
+        }
+        else {
+            List<Fault> errors = either.getLeft();
+            // do something amazingly useful
         }
     }
 
@@ -102,7 +138,11 @@ public class TrinityEmbeddedV3Example {
 
         if (either.isRight()) {
             List<Data> data = either.getRight();
-            // do something amazing with it
+            // do something usefully amazing with it
+        }
+        else {
+            List<Fault> errors = either.getLeft();
+            // do something amazingly useful
         }
     }
 
@@ -136,7 +176,11 @@ public class TrinityEmbeddedV2Example {
 
         if (either.isRight()) {
             List<Data> data = either.getRight();
-            // do something amazing with it
+            // do something usefully amazing with it
+        }
+        else {
+            List<Fault> errors = either.getLeft();
+            // do something amazingly useful
         }
     }
 
