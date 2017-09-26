@@ -15,7 +15,25 @@
  */
 package org.liquigraph.trinity.http;
 
-import com.google.gson.Gson;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
+import static java.util.Arrays.asList;
+import static org.liquigraph.trinity.http.internal.http.Endpoints.openTransactionUri;
+import static org.liquigraph.trinity.http.internal.http.Endpoints.singleTransactionUri;
+import static org.liquigraph.trinity.http.internal.http.RequestBuilders.json;
+import static org.liquigraph.trinity.internal.collection.Lists.prepend;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.liquigraph.trinity.ClosedTransaction;
 import org.liquigraph.trinity.CypherClient;
 import org.liquigraph.trinity.Data;
@@ -26,27 +44,9 @@ import org.liquigraph.trinity.http.internal.payload.CypherExecutionError;
 import org.liquigraph.trinity.http.internal.payload.CypherExecutionResults;
 import org.liquigraph.trinity.http.internal.payload.CypherStatements;
 import org.liquigraph.trinity.http.internal.payload.TransactionDateFormatSupplier;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.liquigraph.trinity.http.internal.collection.Lists.prepend;
-import static org.liquigraph.trinity.http.internal.http.Endpoints.openTransactionUri;
-import static org.liquigraph.trinity.http.internal.http.Endpoints.singleTransactionUri;
-import static org.liquigraph.trinity.http.internal.http.RequestBuilders.json;
-import static java.util.Arrays.asList;
+import com.google.gson.Gson;
 
 public final class HttpClient implements CypherClient<OngoingRemoteTransaction> {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClient.class);

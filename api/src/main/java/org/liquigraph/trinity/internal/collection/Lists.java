@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.liquigraph.trinity.http.internal.collection;
+package org.liquigraph.trinity.internal.collection;
+
+import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Arrays.asList;
 
 public final class Lists {
 
