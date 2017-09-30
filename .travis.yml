@@ -40,7 +40,7 @@ env:
     - NEO_VERSION=3.1.6
       PROJECTS=http,embedded-3x,trinity-neo4j-v3
       WITH_DOCKER=true
-    - NEO_VERSION=3.2.3
+    - NEO_VERSION=3.2.5
       PROJECTS=http,embedded-3x,trinity-neo4j-v3
       WITH_DOCKER=true
       EXTRA_PROFILES=-Pwith-neo4j-common
