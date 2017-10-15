@@ -10,6 +10,7 @@ libraries running on the Java Virtual Machine.
 == Build status
 
 image:https://travis-ci.org/liquigraph/trinity.svg?branch=master["Build Status", link="https://travis-ci.org/liquigraph/trinity"]
+image:https://maven-badges.herokuapp.com/maven-central/org.liquigraph.trinity/trinity-parent/badge.svg["Maven Central", link="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.liquigraph.trinity%22%20AND%20a%3A%22trinity-parent%22%20AND%20p%3A%22pom%22"]
 
 == Why Trinity?
 
