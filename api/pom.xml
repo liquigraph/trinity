@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.liquigraph.trinity</groupId>
         <artifactId>trinity-parent</artifactId>
-        <version>1.0.0-M01</version>
+        <version>1.0.0-M02-SNAPSHOT</version>
     </parent>
 
     <artifactId>trinity-api</artifactId>
