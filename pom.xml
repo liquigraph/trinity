@@ -8,6 +8,11 @@
     <packaging>pom</packaging>
 
     <name>Trinity - Parent POM</name>
+    <url>https://github.com/liquigraph/trinity</url>
+    <description>
+        Trinity is a versatile Cypher query runner for the JVM, supporting all
+        setup types of Neo4j v2 and v3. 
+    </description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
