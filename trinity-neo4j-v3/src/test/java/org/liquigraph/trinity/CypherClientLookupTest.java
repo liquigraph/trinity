@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.liquigraph.trinity;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -25,6 +26,7 @@ import org.liquigraph.trinity.neo4jv3.EmbeddedClient;
 import org.neo4j.harness.junit.Neo4jRule;
 
 import java.util.Properties;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +34,12 @@ public class CypherClientLookupTest {
 
     @Rule public Neo4jRule neo4j = new Neo4jRule();
     @Rule public TemporaryFolder folder = new TemporaryFolder();
+
+    @BeforeClass
+    public static void prepareAll() {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+    }
 
     @Test
     public void looks_up_available_clients() throws Exception {

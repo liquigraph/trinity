@@ -9,4 +9,4 @@ if [ "$WITH_DOCKER" = true ] ; then
         sleep 1
     done
 fi
-mvn -q -am -pl ${PROJECTS} -T4 clean verify -Dneo4j.version=${NEO_VERSION} ${EXTRA_PROFILES} -B -V -t etc/toolchains.xml
+mvn -q -am -pl ${PROJECTS} -T1C clean verify -Dneo4j.version=${NEO_VERSION} ${EXTRA_PROFILES} -B -V -t etc/toolchains.xml

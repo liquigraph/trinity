@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.liquigraph.trinity.bolt;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.liquigraph.trinity.CypherTransport;
@@ -26,6 +27,7 @@ import org.neo4j.harness.junit.Neo4jRule;
 
 import java.util.List;
 import java.util.Properties;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.liquigraph.trinity.Assertions.assertThat;
@@ -39,6 +41,11 @@ public class BoltClientCreatorTest {
 
    private final BoltClientCreator boltClientCreator = new BoltClientCreator();
 
+   @BeforeClass
+   public static void prepareAll() {
+      SLF4JBridgeHandler.removeHandlersForRootLogger();
+      SLF4JBridgeHandler.install();
+   }
 
    @Test
    public void supports_bolt_protocol() {
