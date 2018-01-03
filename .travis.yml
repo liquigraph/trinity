@@ -48,11 +48,9 @@ env:
       WITH_DOCKER=true
     - NEO_VERSION=3.2.9
       PROJECTS=http,embedded-3x,trinity-neo4j-v3,bolt
-      EXTRA_PROFILES=-Pwith-neo4j-common
     - NEO_VERSION=3.3.1
       PROJECTS=http,embedded-3x,trinity-neo4j-v3,bolt
       WITH_DOCKER=true
-      EXTRA_PROFILES=-Pwith-neo4j-common
 install:
   - mvn install -DskipTests=true -B -V -t etc/toolchains.xml
 script: etc/run.sh
